@@ -1,0 +1,39 @@
+services:
+  mysql_db:
+    container_name: mysql_db
+    image: mysql:9.2.0
+    restart: 'no'
+    env_file: ./.env
+    environment:
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_USER=${MYSQL_USERNAME}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - divarData:/var/lib/mysql
+    ports:
+      - ${MYSQL_PORT}:3306
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: 'no'
+    env_file: ./.env
+    environment:
+      - PMA_HOST=mysql_db
+      - PMA_PORT=3306
+    ports:
+      - 8080:80
+    depends_on:
+      - mysql_db
+
+  redis:
+    container_name: redis_db_1
+    image: redis:7.4.1-alpine3.20
+    env_file: ./.env
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+
+
+volumes:
+  divarData:

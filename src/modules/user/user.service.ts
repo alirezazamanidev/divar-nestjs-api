@@ -1,0 +1,135 @@
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
+import { UserEntity } from './entities/user.entity';
+import { UpdateProfileDto } from './dto/user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import {
+  
+  PublicMessage,
+} from 'src/common/enums';
+import { existsSync, unlinkSync } from 'fs';
+
+@Injectable({ scope: Scope.REQUEST })
+export class UserService {
+  constructor(
+    @Inject(REQUEST) private request: Request,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) {}
+
+  async findOneById(userId: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('کاربر مورد نظر یافت نشد');
+    }
+
+    return user;
+  }
+
+  async updateProfile(updateProfileDto: UpdateProfileDto) {
+    // Find user by ID
+    const user = await this.findOneById(this.request.user.id);
+
+    // Define fields that can be updated
+    const updateFields = ['username', 'email', 'fullname', 'bio'] as const;
+
+    // Process each field in the DTO
+    for (const field of updateFields) {
+      const value = updateProfileDto[field];
+
+      // Skip undefined values
+      if (value === undefined) continue;
+
+      // Handle unique constraint validations
+      if (['email', 'username'].includes(field)) {
+        // Build query condition for unique check
+        const whereCondition = {
+          [field]: value,
+          id: Not(this.request.user.id),
+        };
+
+        // Check if value already exists for another user
+        const existingUser = await this.userRepository.findOne({
+          where: whereCondition,
+        });
+
+        if (existingUser) {
+          const errorMessages = {
+            email: 'این ایمیل قبلا ثبت شده است',
+
+            username: 'این نام کاربری قبلا ثبت شده است',
+          };
+          throw new ConflictException(errorMessages[field]);
+        }
+
+        // Reset verification status when email or phone changes
+        if (field === 'email') user.email_verify = false;
+      }
+
+      // Update the field
+      user[field] = value;
+    }
+
+    // Save changes with error handling
+    try {
+      await this.userRepository.save(user);
+      return {
+        message: PublicMessage.UpdateProfile,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('خطا در بروزرسانی پروفایل', {
+        cause: error,
+        description: 'خطا در ذخیره‌سازی تغییرات پروفایل کاربر',
+      });
+    }
+  }
+
+  async uploadAvatar(file: Express.Multer.File) {
+    try {
+      // Get current user from request
+      const userId = this.request.user.id;
+      const user = await this.findOneById(userId);
+
+      // Handle previous avatar deletion if exists
+      if (user.avatar) {
+        if (existsSync(user.avatar.path)) {
+          unlinkSync(user.avatar.path);
+        }
+      }
+
+      // Update user's avatar field with the new file path
+      user.avatar = {
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size,
+      };
+
+      // Save the updated user
+      await this.userRepository.save(user);
+
+      return {
+        message: PublicMessage.UploadAvatar,
+        avatar: file.path,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('خطا در آپلود تصویر پروفایل', {
+        cause: error,
+        description: 'خطا در ذخیره‌سازی تصویر پروفایل کاربر',
+      });
+    }
+  }
+ 
+
+}
