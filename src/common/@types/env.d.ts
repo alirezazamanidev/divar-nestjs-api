@@ -39,5 +39,12 @@ declare namespace NodeJS {
     ZARINPAL_WEB_GATE_URL: string;
     ZARINPAL_VERIFY_URL: string;
     ZARINPAL_PAYMENT_GATEWAY: string;
+
+    // Liara
+    LIARA_BUCKET_NAME: string;
+    LIARA_ACCESS_KEY: string;
+    LIARA_SECRET_KEY: string;
+    LIARA_REGION: string;
+    LIARA_ENDPOINT: string;
   }
 }
