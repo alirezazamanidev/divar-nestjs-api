@@ -7,5 +7,7 @@ export class FileEntity {
     @Column()
     mimetype:string
     @Column()
-    path:string
+    url:string
+    @Column()
+    key:string
 }

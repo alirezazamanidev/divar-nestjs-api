@@ -38,3 +38,5 @@ export const getpaymentredirectUrl = (status: "success" | 'error' |'cancel', met
   return `${process.env.FRONTEND_URL}?${new URLSearchParams(params).toString()}`;
 
 }
+
+

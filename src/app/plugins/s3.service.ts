@@ -26,7 +26,7 @@ import {
       let ext = extname(file.originalname);
       let params: PutObjectCommandInput = {
         Body: file.buffer,
-        Bucket: process.env.S3_BUCKET_NAME,
+        Bucket: process.env.LIARA_BUCKET_NAME, // Changed from S3_BUCKET_NAME to LIARA_BUCKET_NAME
         Key: `${rootName}/${Date.now().toString()}${ext}`,
       };
       try {
@@ -34,16 +34,15 @@ import {
   
         return {
           Url: `${process.env.LIARA_ENDPOINT}/${process.env.LIARA_BUCKET_NAME}/${params.Key}`,
-          key: params.Key,
+          Key: params.Key || `${rootName}/${Date.now().toString()}${ext}`,
         };
       } catch (error) {
-     
         throw new InternalServerErrorException(error);
       }
     }
     async delete(key: string) {
       const params: DeleteObjectCommandInput = {
-        Bucket: process.env.S3_BUCKET_NAME,
+        Bucket: process.env.LIARA_BUCKET_NAME, // Changed from S3_BUCKET_NAME to LIARA_BUCKET_NAME
         Key: key,
       };
       try {
