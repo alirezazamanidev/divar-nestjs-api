@@ -5,9 +5,9 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { InternalServerException } from '../exceptions';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -34,7 +34,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     // For non-HTTP exceptions, convert to InternalServerException
-    const internalException = new InternalServerException(
+    const internalException = new InternalServerErrorException(
       exception instanceof Error
         ? exception.message
         : 'An unexpected error occurred',

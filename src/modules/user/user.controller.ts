@@ -12,10 +12,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../auth/decorators';
 import { UpdateProfileDto, UploadAvatarDTo } from './dto/user.dto';
 import { ContentType } from 'src/common/enums';
-import { UploadFile } from 'src/common/interceptors';
-import { FileValidationPipe } from 'src/common/pipes/file-validation.pipe';
-import { ChargeWalletDto } from './dto/wallet.dto';
-import { WalletService } from './wallet.service';
+
 @Auth()
 @ApiTags('User')
 @Controller('user')
@@ -36,25 +33,25 @@ export class UserController {
     return this.userService.updateProfile(updateProfileDto);
   }
 
-  @Post('upload-avatar')
-  @ApiOperation({
-    summary: 'آپلود تصویر پروفایل',
-    description:
-      'این اندپوینت برای آپلود تصویر پروفایل کاربر احراز هویت شده استفاده می‌شود',
-  })
-  @ApiConsumes(ContentType.Multipart)
-  @ApiBody({ type: UploadAvatarDTo })
-  @UseInterceptors(UploadFile('avatar', 'user'))
-  async uploadAvatar(
-    @UploadedFile(
-      new FileValidationPipe({
-        required: true,
-        allowedTypes: ['jpg', 'jpeg', 'png', 'webp'],
-        maxSize: 2 * 1024 * 1024, // 2MB
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return this.userService.uploadAvatar(file);
-  }
+  // @Post('upload-avatar')
+  // @ApiOperation({
+  //   summary: 'آپلود تصویر پروفایل',
+  //   description:
+  //     'این اندپوینت برای آپلود تصویر پروفایل کاربر احراز هویت شده استفاده می‌شود',
+  // })
+  // @ApiConsumes(ContentType.Multipart)
+  // @ApiBody({ type: UploadAvatarDTo })
+  // @UseInterceptors(UploadFile('avatar', 'user'))
+  // async uploadAvatar(
+  //   @UploadedFile(
+  //     new FileValidationPipe({
+  //       required: true,
+  //       allowedTypes: ['jpg', 'jpeg', 'png', 'webp'],
+  //       maxSize: 2 * 1024 * 1024, // 2MB
+  //     }),
+  //   )
+  //   file: Express.Multer.File,
+  // ) {
+  //   return this.userService.uploadAvatar(file);
+  // }
 }

@@ -96,40 +96,7 @@ export class UserService {
     }
   }
 
-  async uploadAvatar(file: Express.Multer.File) {
-    try {
-      // Get current user from request
-      const userId = this.request.user.id;
-      const user = await this.findOneById(userId);
-
-      // Handle previous avatar deletion if exists
-      if (user.avatar) {
-        if (existsSync(user.avatar.path)) {
-          unlinkSync(user.avatar.path);
-        }
-      }
-
-      // Update user's avatar field with the new file path
-      user.avatar = {
-        path: file.path,
-        mimetype: file.mimetype,
-        size: file.size,
-      };
-
-      // Save the updated user
-      await this.userRepository.save(user);
-
-      return {
-        message: PublicMessage.UploadAvatar,
-        avatar: file.path,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException('خطا در آپلود تصویر پروفایل', {
-        cause: error,
-        description: 'خطا در ذخیره‌سازی تصویر پروفایل کاربر',
-      });
-    }
-  }
+ 
  
 
 }

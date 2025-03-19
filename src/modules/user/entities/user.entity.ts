@@ -28,30 +28,13 @@ export class UserEntity extends BaseEntity {
   @Column({ nullable: true })
   bio: string;
 
-  @Column({ type: 'jsonb', nullable: true })
-  avatar: {
-    path: string;
-    mimetype: string;
-    size: number;
-  };
-
-  @Column({ nullable: true })
-  subscriptionPlanId: string;
-
-  @Column({ type: 'timestamp', nullable: true })
-  subscriptionStartDate: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  subscriptionEndDate: Date;
-
   @Column({ default: false })
   phone_verify: boolean;
 
   @Column({
-    type:'simple-array',
-    default:'user',
+    type: 'simple-array',
   })
-  roles: string[];
+  roles: string[] = [Roles.User];
 
   @Column({ default: false })
   isBlocked: boolean;

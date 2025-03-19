@@ -5,15 +5,14 @@ services:
     restart: 'no'
     env_file: ./.env
     environment:
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_USER=${MYSQL_USERNAME}
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
+    
     volumes:
       - divarData:/var/lib/mysql
     ports:
       - ${MYSQL_PORT}:3306
-
+   
   phpmyadmin:
     container_name: phpmyadmin
     image: phpmyadmin/phpmyadmin

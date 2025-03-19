@@ -96,11 +96,7 @@ export class AuthService {
         phone_verify: true,
         email_verify: true,
         created_at: true,
-        avatar:{
-          path:true,
-          mimetype:true,
-          size:true
-        },
+       
         bio:true,
         updated_at: true,
       },
