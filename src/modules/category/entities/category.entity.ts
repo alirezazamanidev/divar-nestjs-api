@@ -3,10 +3,11 @@ import { FileEntity } from 'src/common/entities/file.entity';
 import { EntityNameEnum } from 'src/common/enums';
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, Tree, TreeChildren, TreeParent, UpdateDateColumn } from 'typeorm';
 import { FormField } from '../types/FormFileds.type';
+import { PostEntity } from 'src/modules/post/entities/post.entity';
 
 @Entity(EntityNameEnum.Category)
 @Tree("materialized-path")
-export class Category extends BaseEntity {
+export class CategoryEntity extends BaseEntity {
 
   @Column()
   title: string;
@@ -20,10 +21,10 @@ export class Category extends BaseEntity {
   icon: FileEntity;
 
   @TreeParent()
-  parent: Category;
+  parent: CategoryEntity;
 
   @TreeChildren()
-  children: Category[];
+  children: CategoryEntity[];
 
   @Column({ nullable: true })
   parentId: string;
@@ -35,5 +36,7 @@ export class Category extends BaseEntity {
   created_at:Date
   @UpdateDateColumn()
   updated_at:Date
+  @OneToMany(()=>PostEntity,post=>post.category)
+  posts:PostEntity[]
 
 }

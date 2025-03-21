@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   
+  OneToMany,
+  
   UpdateDateColumn,
 } from 'typeorm';
 import { EntityNameEnum, Roles } from 'src/common/enums';
 import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
+import { PostEntity } from 'src/modules/post/entities/post.entity';
 
 @Entity(EntityNameEnum.User)
 export class UserEntity extends BaseEntity {
@@ -45,5 +48,7 @@ export class UserEntity extends BaseEntity {
   @UpdateDateColumn()
   updated_at: Date;
 
-  
+  // realations
+  @OneToMany(()=>PostEntity,post=>post.user)
+  posts:PostEntity[]
 }

@@ -12,9 +12,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { Category } from './entities/category.entity';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { UploadFileS3 } from 'src/common/interceptors/upload-file.interceptor';
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { ContentType } from 'src/common/enums';
@@ -49,7 +46,7 @@ export class CategoryController {
   // }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Category> {
+  findOne(@Param('id', ParseUUIDPipe) id: string){
     return this.categoryService.findOne(id);
   }
 

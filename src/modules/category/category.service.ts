@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-import { Category } from './entities/category.entity';
+import { CategoryEntity } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { ConflictMessages, NotFoundMessages, PublicMessage } from 'src/common/enums';
 import { S3Service } from 'src/app/plugins/s3.service';
@@ -10,8 +10,8 @@ import slugify from 'slugify';
 @Injectable()
 export class CategoryService {
   constructor(
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(CategoryEntity)
+    private readonly categoryRepository: Repository<CategoryEntity>,
     private readonly s3Service:S3Service
   ) {}
 
@@ -57,13 +57,13 @@ export class CategoryService {
    
   }
 
-  async findAll(): Promise<Category[]> {
+  async findAll(): Promise<CategoryEntity[]> {
     return this.categoryRepository.find({
       relations: ['children', 'parent'],
     });
   }
 
-  async findOne(id: string): Promise<Category> {
+    async findOne(id: string): Promise<CategoryEntity> {
     const category = await this.categoryRepository.findOne({
       where: { id },
     });
@@ -75,7 +75,7 @@ export class CategoryService {
     return category;
   }
 
-  async search(query: string): Promise<Category[]> {
+  async search(query: string): Promise<CategoryEntity[]> {
     return this.categoryRepository.find({
       where: [
         { title: Like(`%${query}%`) },
@@ -93,7 +93,7 @@ export class CategoryService {
 //     });
 //   }
 
-  async getFullHierarchy(categoryId: string): Promise<Category> {
+  async getFullHierarchy(categoryId: string): Promise<CategoryEntity> {
     const category = await this.categoryRepository.findOne({
       where: { id: categoryId },
       relations: ['children', 'parent', 'children.children'],
