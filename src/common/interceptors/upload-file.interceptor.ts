@@ -20,6 +20,15 @@ export const DOCUMENT_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 ];
 
+export const VIDEO_MIME_TYPES = [
+  'video/mp4',
+  'video/mpeg',
+  'video/webm',
+  'video/quicktime',
+  'video/x-msvideo',
+  'video/x-matroska',
+];
+
 // File validation options
 export interface FileValidationOptions {
   maxSize?: number;
@@ -36,6 +45,16 @@ export const DEFAULT_IMAGE_OPTIONS: FileValidationOptions = {
 export const DEFAULT_DOCUMENT_OPTIONS: FileValidationOptions = {
   maxSize: 10 * 1024 * 1024, // 10MB
   allowedMimeTypes: DOCUMENT_MIME_TYPES,
+};
+
+export const DEFAULT_VIDEO_OPTIONS: FileValidationOptions = {
+  maxSize: 50 * 1024 * 1024, // 50MB
+  allowedMimeTypes: VIDEO_MIME_TYPES,
+};
+
+export const DEFAULT_MEDIA_OPTIONS: FileValidationOptions = {
+  maxSize: 50 * 1024 * 1024, // 50MB
+  allowedMimeTypes: [...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES],
 };
 
 // Helper for file validation

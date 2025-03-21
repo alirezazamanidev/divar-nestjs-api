@@ -83,7 +83,6 @@ export class AuthService {
       where: {
         id: userId,
       },
-      relations:['wallet'],
       select: {
         id: true,
         username: true,

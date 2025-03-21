@@ -38,5 +38,7 @@ export const getpaymentredirectUrl = (status: "success" | 'error' |'cancel', met
   return `${process.env.FRONTEND_URL}?${new URLSearchParams(params).toString()}`;
 
 }
+export const createSlug = (title:string) => {
 
-
+  return `${title.trim().toLowerCase().replace(/ /g,'-')}-${Date.now().toString(36)}`
+}

@@ -6,10 +6,7 @@ export enum AuthMessages {
 }
 export enum ConflictMessages{
   category='چنین دسته بندی قبلا با این عنوان ایجاد شده است!',
-  blog='چنین دوره ای قبلا با این عنوان ایجاد شده است',
-  Course='چنین دوره ای قبلا ایجاد شده است!',
-  Chapter='چنین فصلی برای این دوره ایجاد شده است!',
-  Discount='چنین کد تخفیفی قبلا ایجاد شده است!',
+  post='چنین پست قبلا با این عنوان ایجاد شده است!',
 }
 export enum ForbiddenMessages{
   access_denied='شما اجازه دسترسی به این روت را ندارید!'
