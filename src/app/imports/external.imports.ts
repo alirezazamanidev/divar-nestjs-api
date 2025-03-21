@@ -19,7 +19,6 @@ export const appExternalImports = [
   CacheModule.registerAsync({
     isGlobal: true,
     useFactory: async () => ({
-      ttl: 60 * 60 * 24, // 24 hours cache TTL
       max: 100, // Maximum number of items in cache
       stores: [
         createKeyv(

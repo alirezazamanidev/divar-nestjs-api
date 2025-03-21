@@ -28,15 +28,11 @@ export default function AppInit(app: NestExpressApplication) {
   app.use(cookieParser());
   app.use(compression());
 
-  // Serve static files
-  app.useStaticAssets(join(process.cwd(), "public/"), {
-    prefix: "/static",
-  });
 
   // Global pipes and interceptors
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
-    // forbidNonWhitelisted: true,
+    forbidNonWhitelisted: true,
     transform: true,
     transformOptions: {
       enableImplicitConversion: true

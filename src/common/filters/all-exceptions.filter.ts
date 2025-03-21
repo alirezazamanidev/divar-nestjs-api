@@ -12,7 +12,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     
     const isDevelopment = process.env.NODE_ENV !== 'production';
-    
     // Get status code and message
     const status = 
       exception instanceof HttpException
@@ -34,8 +33,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         name: exception.name,
       });
       
-      // Log the full error to console in development
-      console.error('Exception caught:', exception);
+    
     } else {
       // In production, hide internal server error details
       if (status === HttpStatus.INTERNAL_SERVER_ERROR) {

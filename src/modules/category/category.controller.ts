@@ -48,10 +48,10 @@ export class CategoryController {
   //   return this.categoryService.search(query);
   // }
 
-  // @Get(':id')
-  // findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Category> {
-  //   return this.categoryService.findOne(id);
-  // }
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Category> {
+    return this.categoryService.findOne(id);
+  }
 
   // @Get(':id/hierarchy')
   // getFullHierarchy(@Param('id', ParseUUIDPipe) id: string): Promise<Category> {

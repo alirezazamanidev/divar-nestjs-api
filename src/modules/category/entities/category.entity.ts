@@ -1,7 +1,8 @@
 import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
 import { FileEntity } from 'src/common/entities/file.entity';
 import { EntityNameEnum } from 'src/common/enums';
-import { Column, Entity, ManyToOne, OneToMany, Tree, TreeChildren, TreeParent } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, Tree, TreeChildren, TreeParent, UpdateDateColumn } from 'typeorm';
+import { FormField } from '../types/FormFileds.type';
 
 @Entity(EntityNameEnum.Category)
 @Tree("materialized-path")
@@ -26,6 +27,13 @@ export class Category extends BaseEntity {
 
   @Column({ nullable: true })
   parentId: string;
+
+  @Column({type:'json',nullable:true})
+  formFields:FormField[]
   
+  @CreateDateColumn()
+  created_at:Date
+  @UpdateDateColumn()
+  updated_at:Date
 
 }

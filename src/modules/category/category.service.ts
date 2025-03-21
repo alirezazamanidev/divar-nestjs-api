@@ -18,7 +18,7 @@ export class CategoryService {
   async create(
     createCategoryDto: CreateCategoryDto
   ) {
-    const { parentId, title, description, icon } = createCategoryDto;
+    const { parentId, title, description, icon,formFields } = createCategoryDto;
     if (parentId) {
       await this.findOne(parentId);
     }
@@ -28,6 +28,7 @@ export class CategoryService {
     let category = this.categoryRepository.create({
         parentId,
         title,
+        formFields,
         slug: slugify(title, {lower: true, strict: true, replacement: '-', remove: /[*+~.()'"!:@]/g}),   
         description,
         icon: {} 
