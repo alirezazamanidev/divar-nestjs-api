@@ -2,8 +2,17 @@ import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
 import { EntityNameEnum, StatusEnum } from 'src/common/enums';
 import { CategoryEntity } from 'src/modules/category/entities/category.entity';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
-import { Column, CreateDateColumn, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToOne, UpdateDateColumn } from 'typeorm';
-import { AddressEntity } from './address.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  UpdateDateColumn,
+} from 'typeorm';
 import { FileEntity } from 'src/common/entities/file.entity';
 
 @Entity(EntityNameEnum.Post)
@@ -20,35 +29,43 @@ export class PostEntity extends BaseEntity {
   slug: string;
   @Column({ type: 'text' })
   description: string;
-  @Column({ type: 'enum',enum:StatusEnum, default: StatusEnum.Confrim })
+  @Column({ type: 'enum', enum: StatusEnum, default: StatusEnum.Confrim })
   status: string;
 
   @Column('json')
-  formData: Record<string, any>;
+  options: Record<string, any>;
 
   @Column({ default: false })
   isActive: boolean;
-  
+
   // برای ذخیره فایل‌های مرتبط با پست (عکس یا ویدیو)
   @Column('simple-array', { nullable: true })
   mediaFiles: FileEntity[];
-  
 
   @Column({ default: false })
   isExpired: boolean;
-  @Column({ type: 'timestamp',nullable:true })
+  @Column({ type: 'timestamp', nullable: true })
   expiresAt: Date;
-
+  @Column()
+  city: string;
+  @Column()
+  pronice: string;
+  @Column({type:'json'})
+  location: {
+    lat: number;
+    lng: number;
+  };
+  @Column({default:true})
+  allowChatMessages:boolean
   @CreateDateColumn()
-  cteated_at:Date
+  cteated_at: Date;
   @UpdateDateColumn()
-  updated_at:Date
+  updated_at: Date;
 
   // relastions
   @ManyToOne(() => UserEntity, (user) => user.posts, { onDelete: 'CASCADE' })
   user: UserEntity;
   @ManyToOne(() => CategoryEntity, (category) => category.posts)
   category: CategoryEntity;
-  @OneToOne(()=>AddressEntity,address=>address.post,{onDelete:'CASCADE',nullable:true})
-  address:AddressEntity
+
 }

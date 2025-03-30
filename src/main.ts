@@ -7,21 +7,7 @@ import AppInit from './app';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Apply global validation pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-      transformOptions:{
-        enableImplicitConversion:true
-      }
-    }),
-  );
   
-
-  // Enable CORS
-  app.enableCors();
 
   AppInit(app)
   const PORT = process.env.APP_PORT ?? 4000;

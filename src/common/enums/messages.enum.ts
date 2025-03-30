@@ -13,12 +13,9 @@ export enum ForbiddenMessages{
 }
 export enum NotFoundMessages{
   Category='دسته بندی یافت نشد',
-  Comment='کامنتی یافت نشد',
-  Blog='بلاگی یافت نشد!',
+  Post='آگهی یافت نشد',
   User='کاربر یافت نشد',
-  Course='دوره یافت نشد!',
-  Payment='پرداخت مورد نظر یافت نشد',
-  Discount='کد تخفیف یافت نشد!'
+
 
 }
 export enum ForbiddenMessage {

@@ -3,30 +3,35 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  NotFoundException,
   Scope,
 } from '@nestjs/common';
 import { CreatePostDto } from './dtos/post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostEntity } from './entities/post.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { S3Service } from 'src/app/plugins/s3.service';
-import { FileEntity } from 'src/common/entities/file.entity';
-import { ConflictMessages } from 'src/common/enums';
+
+import { ConflictMessages, NotFoundMessages } from 'src/common/enums';
 import { createSlug } from 'src/common/utils/function.util';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { CategoryService } from '../category/category.service';
 import { FormField } from '../category/types/FormFileds.type';
+import { FileEntity } from 'src/common/entities/file.entity';
+import { CategoryEntity } from '../category/entities/category.entity';
+import { Like, IsNull } from 'typeorm';
 
 @Injectable({ scope: Scope.REQUEST })
 export class PostService {
   constructor(
-    private readonly DataSource:DataSource,
+    private readonly DataSource: DataSource,
     @Inject(REQUEST) private readonly request: Request,
     @InjectRepository(PostEntity)
     private readonly postRepository: Repository<PostEntity>,
     private readonly s3Service: S3Service,
     private readonly categoryService: CategoryService,
+    private readonly datasource: DataSource,
   ) {}
 
   async checkExistPost(title: string, userId: string) {
@@ -36,48 +41,373 @@ export class PostService {
     if (post) throw new ConflictException(ConflictMessages.post);
   }
   async createPost(postDto: CreatePostDto, mediaFiles: Express.Multer.File[]) {
-    return await this.DataSource.transaction(async(manager)=>{
-         // check if category exist and check formData is valid
-    const category = await this.categoryService.findOne(postDto.categoryId);
-    this.validateFormData(postDto.formData, category.formFields);
-    // Create a new post entity
-    const post = manager.create(PostEntity,{
-      categoryId: postDto.categoryId,
-      userId: this.request.user.id,
-      title:postDto.title,
-      description:postDto.description,
-      slug: createSlug(postDto.title),
-      formData: postDto.formData,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    });
+    return await this.DataSource.transaction(async (manager) => {
+      // check if category exist and check formData is valid
+      const category = await this.categoryService.findOne(postDto.categoryId);
+      this.validateFormData(postDto.options, category.formFields);
+      // Create a new post entity
+      const post = manager.create(PostEntity, {
+        categoryId: postDto.categoryId,
+        userId: this.request.user.id,
+        title: postDto.title,
+        description: postDto.description,
+        slug: createSlug(postDto.title),
+        options: postDto.options,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        city:postDto.city,
+        
+        province:postDto.province,
+        allowChatMessages:postDto.allowChatMessages,
+        location:postDto.location
+      });
 
-    // Upload media files to S3 if any
-    if (mediaFiles && mediaFiles.length > 0) {
-      const uploadedFiles: FileEntity[] = [];
+      // Upload media files to S3 if any
+      if (mediaFiles && mediaFiles.length > 0) {
+        const uploadedFiles: FileEntity[] = [];
 
-      for (const file of mediaFiles) {
-        const uploadResult = await this.s3Service.upload(file, 'posts');
+        for (const file of mediaFiles) {
+          const uploadResult = await this.s3Service.upload(file, 'posts');
 
-        const fileEntity = new FileEntity();
-        fileEntity.url = uploadResult.Url;
-        fileEntity.key = uploadResult.Key;
-        fileEntity.mimetype = file.mimetype;
-        fileEntity.size = file.size;
+          const fileEntity = new FileEntity();
+          fileEntity.url = uploadResult.Url;
+          fileEntity.key = uploadResult.Key;
+          fileEntity.mimetype = file.mimetype;
+          fileEntity.size = file.size;
 
-        uploadedFiles.push(fileEntity);
+          uploadedFiles.push(fileEntity);
+        }
+
+        post.mediaFiles = uploadedFiles;
       }
 
-      post.mediaFiles = uploadedFiles;
+      // Save the post to the database
+      await manager.save(post);
+      return {
+        message: 'created!',
+      };
+    });
+  }
+  async createPostPage(slug: string) {
+    // جستجوی دسته اصلی انتخاب شده
+    let category: CategoryEntity | null = null;
+    let showBack = false;
+    let where: FindOptionsWhere<CategoryEntity> = {
+      parentId: IsNull(),
+    };
+
+    if (slug) {
+      showBack = true;
+      category = await this.datasource.manager.findOne(CategoryEntity, {
+        where: {
+          slug: slug.trim(),
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          formFields: true,
+        },
+      });
+      
+      if (!category) throw new NotFoundException(NotFoundMessages.Category);
+     
+ 
+      where = {
+        parentId: category.id,
+      };
+    }
+    
+    const categories = await this.datasource.manager.find(CategoryEntity, {
+      where,
+      select:{
+        id:true,
+        title:true,
+        slug:true
+      }
+    });
+
+    return {
+      categories,
+      category,
+      showBack,
+
+    };
+  }
+  async getOne(id: string) {
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
+    if (!post) throw new NotFoundException(NotFoundMessages.Post);
+    return post;
+  }
+
+  async searchCategories(searchQuery: string) {
+    // جستجوی دسته‌بندی‌ها بر اساس عنوان با استفاده از LIKE
+    const categories = await this.datasource.manager.find(CategoryEntity, {
+      where: searchQuery
+        ? {
+            title: Like(`%${searchQuery}%`),
+          }
+        : {},
+      relations: ['icon'], // اضافه کردن رابطه با آیکون
+    });
+
+    // جمع‌آوری نتایج
+    const results: {
+      category: CategoryEntity & { hasFormFields: boolean };
+      postCount: number;
+      categoryWithFormFields: CategoryEntity;
+    }[] = [];
+
+    for (const category of categories) {
+      // بررسی آیا دسته اصلی دارای formFields است
+      const hasDirectFormFields =
+        category.formFields && category.formFields.length > 0;
+
+      // بررسی زیردسته‌های سطح ۲
+      const level2Categories = await this.datasource.manager.find(
+        CategoryEntity,
+        {
+          where: { parentId: category.id },
+        },
+      );
+
+      let hasSubcategoryFormFields = false;
+      let categoryWithFormFields: CategoryEntity | null = null;
+
+      // بررسی formFields در زیردسته‌های سطح ۲
+      for (const level2Category of level2Categories) {
+        if (level2Category.formFields && level2Category.formFields.length > 0) {
+          hasSubcategoryFormFields = true;
+          categoryWithFormFields = level2Category;
+          break;
+        }
+
+        // بررسی زیردسته‌های سطح ۳
+        const level3Categories = await this.datasource.manager.find(
+          CategoryEntity,
+          {
+            where: { parentId: level2Category.id },
+          },
+        );
+
+        for (const level3Category of level3Categories) {
+          if (
+            level3Category.formFields &&
+            level3Category.formFields.length > 0
+          ) {
+            hasSubcategoryFormFields = true;
+            categoryWithFormFields = level3Category;
+            break;
+          }
+        }
+
+        if (hasSubcategoryFormFields) break;
+      }
+
+      // اگر خود دسته یا یکی از زیردسته‌ها formFields داشت، به نتایج اضافه کن
+      if (hasDirectFormFields || hasSubcategoryFormFields) {
+        // شمارش تعداد آگهی‌های این دسته
+        const postCount = await this.postRepository.count({
+          where: { categoryId: category.id },
+        });
+
+        results.push({
+          category: {
+            ...category,
+            hasFormFields: hasDirectFormFields,
+          },
+          postCount,
+          categoryWithFormFields: categoryWithFormFields || category,
+        });
+      }
     }
 
-    // Save the post to the database
-    await manager.save(post);
-    return {
-        message:'created!'
-    }
-    })
-   
+    return results;
   }
+
+  // متد جدید برای نمایش دسته‌بندی‌های اصلی (شبیه صفحه اصلی دیوار)
+  async getMainCategories() {
+    // دریافت همه دسته‌بندی‌های اصلی (دسته‌هایی که parentId ندارند)
+    const mainCategories = await this.datasource.manager.find(CategoryEntity, {
+      where: { parentId: IsNull() },
+    });
+
+    const result: {
+      category: CategoryEntity;
+      postCount: number;
+      hasFormFields: boolean;
+    }[] = [];
+
+    for (const category of mainCategories) {
+      // شمارش تعداد آگهی‌های این دسته
+      const postCount = await this.postRepository.count({
+        where: { categoryId: category.id },
+      });
+
+      // بررسی آیا خود دسته یا زیردسته‌های آن formFields دارند
+      const hasFormFields =
+        category.formFields && category.formFields.length > 0;
+      let hasSubcategoryWithFormFields = false;
+
+      if (!hasFormFields) {
+        // بررسی زیردسته‌های سطح 2
+        const level2Categories = await this.datasource.manager.find(
+          CategoryEntity,
+          {
+            where: { parentId: category.id },
+          },
+        );
+
+        for (const level2 of level2Categories) {
+          if (level2.formFields && level2.formFields.length > 0) {
+            hasSubcategoryWithFormFields = true;
+            break;
+          }
+
+          // بررسی زیردسته‌های سطح 3
+          const level3Categories = await this.datasource.manager.find(
+            CategoryEntity,
+            {
+              where: { parentId: level2.id },
+            },
+          );
+
+          for (const level3 of level3Categories) {
+            if (level3.formFields && level3.formFields.length > 0) {
+              hasSubcategoryWithFormFields = true;
+              break;
+            }
+          }
+
+          if (hasSubcategoryWithFormFields) break;
+        }
+      }
+
+      // فقط دسته‌هایی را اضافه کن که خود یا زیردسته‌های آنها formFields داشته باشند
+      if (hasFormFields || hasSubcategoryWithFormFields) {
+        result.push({
+          category,
+          postCount,
+          hasFormFields: hasFormFields || hasSubcategoryWithFormFields,
+        });
+      }
+    }
+
+    return result;
+  }
+
+  // متد جدید برای دریافت همه دسته‌بندی‌ها و زیردسته‌های آنها (برای نمایش کامل)
+  async getAllCategoriesWithHierarchy() {
+    // دریافت همه دسته‌بندی‌های اصلی
+    const mainCategories = await this.datasource.manager.find(CategoryEntity, {
+      where: { parentId: IsNull() },
+    });
+
+    const result: {
+      category: CategoryEntity;
+      hasFormFields: boolean;
+      children: {
+        category: CategoryEntity;
+        hasFormFields: boolean;
+        children: {
+          category: CategoryEntity;
+          hasFormFields: boolean;
+        }[];
+      }[];
+      postCount: number;
+    }[] = [];
+
+    for (const mainCategory of mainCategories) {
+      const level2Categories = await this.datasource.manager.find(
+        CategoryEntity,
+        {
+          where: { parentId: mainCategory.id },
+          relations: ['icon'],
+        },
+      );
+
+      const level2WithChildren: {
+        category: CategoryEntity;
+        hasFormFields: boolean;
+        children: {
+          category: CategoryEntity;
+          hasFormFields: boolean;
+        }[];
+      }[] = [];
+
+      for (const level2 of level2Categories) {
+        const level3Categories = await this.datasource.manager.find(
+          CategoryEntity,
+          {
+            where: { parentId: level2.id },
+            relations: ['icon'],
+          },
+        );
+
+        level2WithChildren.push({
+          category: level2,
+          hasFormFields: level2.formFields && level2.formFields.length > 0,
+          children: level3Categories.map((level3) => ({
+            category: level3,
+            hasFormFields: level3.formFields && level3.formFields.length > 0,
+          })),
+        });
+      }
+
+      // شمارش تعداد آگهی‌های این دسته
+      const postCount = await this.postRepository.count({
+        where: { categoryId: mainCategory.id },
+      });
+
+      result.push({
+        category: mainCategory,
+        hasFormFields:
+          mainCategory.formFields && mainCategory.formFields.length > 0,
+        children: level2WithChildren,
+        postCount,
+      });
+    }
+
+    return result;
+  }
+
+  // متد جدید برای پیشنهاد دسته‌بندی برای ایجاد آگهی
+  async suggestCategoryForNewPost() {
+    // دریافت دسته‌بندی‌های پربازدید یا محبوب
+    // در اینجا ما ساده‌سازی کرده و دسته‌بندی‌های اصلی را که بیشترین آگهی را دارند بر می‌گردانیم
+
+    // دریافت همه دسته‌بندی‌های اصلی
+    const mainCategories = await this.datasource.manager.find(CategoryEntity, {
+      where: { parentId: IsNull() },
+    });
+
+    const categoriesWithPostCount: {
+      category: CategoryEntity;
+      postCount: number;
+    }[] = [];
+
+    // محاسبه تعداد آگهی برای هر دسته‌بندی
+    for (const category of mainCategories) {
+      const postCount = await this.postRepository.count({
+        where: { categoryId: category.id },
+      });
+
+      categoriesWithPostCount.push({ category, postCount });
+    }
+
+    // مرتب‌سازی بر اساس تعداد آگهی (نزولی)
+    categoriesWithPostCount.sort((a, b) => b.postCount - a.postCount);
+
+    // برگرداندن 5 دسته‌بندی اول (یا تمام آنها، اگر کمتر از 5 دسته‌بندی وجود دارد)
+    return categoriesWithPostCount.slice(0, 5).map((item) => ({
+      ...item,
+      hasFormFields:
+        item.category.formFields && item.category.formFields.length > 0,
+    }));
+  }
+
   private validateFormData(
     formData: Record<string, any>,
     formFields: FormField[],
