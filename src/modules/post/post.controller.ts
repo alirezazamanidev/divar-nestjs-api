@@ -1,4 +1,4 @@
-import { Controller, UseInterceptors, Post, Body, UploadedFiles, Get, Param, Query } from '@nestjs/common';
+import { Controller, UseInterceptors, Post, Body, UploadedFiles, Get, Param, Query, Logger } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dtos/post.dto';
 import { Auth } from '../auth/decorators';
@@ -8,6 +8,7 @@ import { DEFAULT_MEDIA_OPTIONS, UploadFileFieildsS3 } from 'src/common/intercept
 
 @Controller('post')
 export class PostController {
+  private readonly logger = new Logger(PostController.name);
   constructor(private readonly postService: PostService) {}
   
   @Get('create')
@@ -29,6 +30,7 @@ export class PostController {
       videos?: Express.Multer.File[] 
     }
   ) {
+   
     // Combine all media files
     const mediaFiles = [
       ...(files.images || []),

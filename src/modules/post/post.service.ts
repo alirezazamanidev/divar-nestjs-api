@@ -42,46 +42,54 @@ export class PostService {
   }
   async createPost(postDto: CreatePostDto, mediaFiles: Express.Multer.File[]) {
     return await this.DataSource.transaction(async (manager) => {
+      // check post already exist
+      await this.checkExistPost(postDto.title, this.request.user.id);
       // check if category exist and check formData is valid
       const category = await this.categoryService.findOne(postDto.categoryId);
       this.validateFormData(postDto.options, category.formFields);
+
+      
       // Create a new post entity
       const post = manager.create(PostEntity, {
         categoryId: postDto.categoryId,
         userId: this.request.user.id,
         title: postDto.title,
         description: postDto.description,
+
         slug: createSlug(postDto.title),
         options: postDto.options,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        city:postDto.city,
-        
-        province:postDto.province,
-        allowChatMessages:postDto.allowChatMessages,
-        location:postDto.location
+        city: postDto.city,
+
+        province: postDto.province,
+        allowChatMessages: postDto.allowChatMessages,
+        location: postDto.location,
+        mediaFiles:[]
       });
 
-      // Upload media files to S3 if any
       if (mediaFiles && mediaFiles.length > 0) {
         const uploadedFiles: FileEntity[] = [];
-
+        
         for (const file of mediaFiles) {
           const uploadResult = await this.s3Service.upload(file, 'posts');
-
-          const fileEntity = new FileEntity();
-          fileEntity.url = uploadResult.Url;
-          fileEntity.key = uploadResult.Key;
-          fileEntity.mimetype = file.mimetype;
-          fileEntity.size = file.size;
-
+          
+          // Create FileEntity object with required properties
+          const fileEntity: FileEntity = {
+            size: file.size,
+            mimetype: file.mimetype,
+            url: uploadResult.Url,
+            key: uploadResult.Key,   
+          };
+          
           uploadedFiles.push(fileEntity);
         }
-
+        
+        // Assign uploaded files to post
         post.mediaFiles = uploadedFiles;
       }
-
+  
       // Save the post to the database
-      await manager.save(post);
+      const savedPost = await manager.save(post);
       return {
         message: 'created!',
       };
@@ -108,29 +116,27 @@ export class PostService {
           formFields: true,
         },
       });
-      
+
       if (!category) throw new NotFoundException(NotFoundMessages.Category);
-     
- 
+
       where = {
         parentId: category.id,
       };
     }
-    
+
     const categories = await this.datasource.manager.find(CategoryEntity, {
       where,
-      select:{
-        id:true,
-        title:true,
-        slug:true
-      }
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+      },
     });
 
     return {
       categories,
       category,
       showBack,
-
     };
   }
   async getOne(id: string) {

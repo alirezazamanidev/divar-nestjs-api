@@ -63,12 +63,9 @@ export class CreatePostDto {
 
   @ApiProperty({
     description: 'موقعیت جغرافیایی',
-    type: LocationDto,
   })
-  @ValidateNested()
-  @Type(() => LocationDto)
   @IsNotEmpty({ message: 'موقعیت جغرافیایی نمی‌تواند خالی باشد' })
-  location: LocationDto;
+  location: Record<string, number>;
 
   @ApiProperty({
     description: 'عنوان پست',

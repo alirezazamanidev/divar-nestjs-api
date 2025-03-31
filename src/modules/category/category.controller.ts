@@ -45,6 +45,11 @@ export class CategoryController {
   //   return this.categoryService.search(query);
   // }
 
+  @Get('seed')
+  seed(){
+    return this.categoryService.seed();
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string){
     return this.categoryService.findOne(id);

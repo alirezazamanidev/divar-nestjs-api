@@ -38,10 +38,8 @@ export class PostEntity extends BaseEntity {
   @Column({ default: false })
   isActive: boolean;
 
-  // برای ذخیره فایل‌های مرتبط با پست (عکس یا ویدیو)
-  @Column('simple-array', { nullable: true })
+  @Column({ type: 'json', nullable: true })
   mediaFiles: FileEntity[];
-
   @Column({ default: false })
   isExpired: boolean;
   @Column({ type: 'timestamp', nullable: true })
@@ -49,7 +47,7 @@ export class PostEntity extends BaseEntity {
   @Column()
   city: string;
   @Column()
-  pronice: string;
+  province: string;
   @Column({type:'json'})
   location: {
     lat: number;

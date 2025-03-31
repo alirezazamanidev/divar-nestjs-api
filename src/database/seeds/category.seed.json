@@ -1,0 +1,453 @@
+{
+    "categories": [
+      {
+        "title": "املاک",
+        "slug": "real-estate",
+        "description": "خرید و فروش و اجاره املاک",
+        "parentId": null,
+        "formFields": null,
+        "children": [
+          {
+            "title": "فروش مسکونی",
+            "slug": "residential-sale",
+            "description": "فروش املاک مسکونی",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "آپارتمان",
+                "slug": "apartment",
+                "description": "فروش آپارتمان",
+                "parentId": null,
+                "formFields": [
+                  {"name": "area", "type": "number", "label": "متراژ (متر مربع)", "required": true, "validation": {"min": 10, "max": 10000}},
+                  {"name": "rooms", "type": "number", "label": "تعداد اتاق", "required": true, "validation": {"min": 0, "max": 20}},
+                  {"name": "floor", "type": "number", "label": "طبقه", "required": false, "validation": {"min": -5, "max": 100}},
+                  {"name": "elevator", "type": "checkbox", "label": "آسانسور", "required": false},
+                  {"name": "parking", "type": "checkbox", "label": "پارکینگ", "required": false},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 1000000000000}}
+                ]
+              },
+              {
+                "title": "خانه و ویلا",
+                "slug": "house-villa",
+                "description": "فروش خانه و ویلا",
+                "parentId": null,
+                "formFields": [
+                  {"name": "area", "type": "number", "label": "متراژ (متر مربع)", "required": true, "validation": {"min": 20, "max": 20000}},
+                  {"name": "landArea", "type": "number", "label": "مساحت زمین (متر مربع)", "required": true, "validation": {"min": 50, "max": 50000}},
+                  {"name": "rooms", "type": "number", "label": "تعداد اتاق", "required": true, "validation": {"min": 1, "max": 30}},
+                  {"name": "pool", "type": "checkbox", "label": "استخر", "required": false},
+                  {"name": "parking", "type": "checkbox", "label": "پارکینگ", "required": false},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 5000000, "max": 1000000000000}}
+                ]
+              },
+              {
+                "title": "زمین و کلنگی",
+                "slug": "land-old-house",
+                "description": "فروش زمین و خانه کلنگی",
+                "parentId": null,
+                "formFields": [
+                  {"name": "area", "type": "number", "label": "مساحت زمین (متر مربع)", "required": true, "validation": {"min": 50, "max": 100000}},
+                  {"name": "frontage", "type": "number", "label": "بر (متر)", "required": false, "validation": {"min": 1, "max": 1000}},
+                  {"name": "usage", "type": "select", "label": "کاربری", "required": true, "options": ["مسکونی", "تجاری", "کشاورزی"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 1000000000000}}
+                ]
+              }
+            ]
+          },
+          {
+            "title": "اجاره مسکونی",
+            "slug": "residential-rent",
+            "description": "اجاره املاک مسکونی",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "آپارتمان",
+                "slug": "apartment-rent",
+                "description": "اجاره آپارتمان",
+                "parentId": null,
+                "formFields": [
+                  {"name": "area", "type": "number", "label": "متراژ (متر مربع)", "required": true, "validation": {"min": 10, "max": 10000}},
+                  {"name": "rooms", "type": "number", "label": "تعداد اتاق", "required": true, "validation": {"min": 0, "max": 20}},
+                  {"name": "deposit", "type": "number", "label": "ودیعه (تومان)", "required": true, "validation": {"min": 0, "max": 10000000000}},
+                  {"name": "rent", "type": "number", "label": "اجاره ماهانه (تومان)", "required": true, "validation": {"min": 10000, "max": 1000000000}},
+                  {"name": "elevator", "type": "checkbox", "label": "آسانسور", "required": false},
+                  {"name": "parking", "type": "checkbox", "label": "پارکینگ", "required": false}
+                ]
+              },
+              {
+                "title": "خانه و ویلا",
+                "slug": "house-villa-rent",
+                "description": "اجاره خانه و ویلا",
+                "parentId": null,
+                "formFields": [
+                  {"name": "area", "type": "number", "label": "متراژ (متر مربع)", "required": true, "validation": {"min": 20, "max": 20000}},
+                  {"name": "rooms", "type": "number", "label": "تعداد اتاق", "required": true, "validation": {"min": 1, "max": 30}},
+                  {"name": "deposit", "type": "number", "label": "ودیعه (تومان)", "required": true, "validation": {"min": 0, "max": 10000000000}},
+                  {"name": "rent", "type": "number", "label": "اجاره ماهانه (تومان)", "required": true, "validation": {"min": 10000, "max": 1000000000}},
+                  {"name": "pool", "type": "checkbox", "label": "استخر", "required": false}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "وسایل نقلیه",
+        "slug": "vehicles",
+        "description": "خرید و فروش وسایل نقلیه",
+        "parentId": null,
+        "formFields": null,
+        "children": [
+          {
+            "title": "خودرو",
+            "slug": "car",
+            "description": "خرید و فروش خودرو",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "سواری",
+                "slug": "sedan",
+                "description": "خودروهای سواری",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "select", "label": "برند", "required": true, "options": ["پژو", "سمند", "پراید", "تویوتا", "هیوندای"]},
+                  {"name": "year", "type": "number", "label": "سال تولید", "required": true, "validation": {"min": 1300, "max": 1404}},
+                  {"name": "mileage", "type": "number", "label": "کارکرد (کیلومتر)", "required": true, "validation": {"min": 0, "max": 1000000}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده", "تصادفی"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 100000000000}}
+                ]
+              },
+              {
+                "title": "کلاسیک",
+                "slug": "classic",
+                "description": "خودروهای کلاسیک",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "text", "label": "برند", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "year", "type": "number", "label": "سال تولید", "required": true, "validation": {"min": 1300, "max": 1400}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده", "نیاز به تعمیر"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 100000000000}}
+                ]
+              },
+              {
+                "title": "اجاره‌ای",
+                "slug": "rental",
+                "description": "خودروهای اجاره‌ای",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "select", "label": "برند", "required": true, "options": ["پژو", "سمند", "تویوتا"]},
+                  {"name": "year", "type": "number", "label": "سال تولید", "required": true, "validation": {"min": 1300, "max": 1404}},
+                  {"name": "dailyRent", "type": "number", "label": "اجاره روزانه (تومان)", "required": true, "validation": {"min": 50000, "max": 10000000}}
+                ]
+              },
+              {
+                "title": "سنگین",
+                "slug": "heavy",
+                "description": "خودروهای سنگین",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "select", "label": "نوع", "required": true, "options": ["کامیون", "اتوبوس", "تریلی"]},
+                  {"name": "year", "type": "number", "label": "سال تولید", "required": true, "validation": {"min": 1300, "max": 1404}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 10000000, "max": 100000000000}}
+                ]
+              }
+            ]
+          },
+          {
+            "title": "موتورسیکلت",
+            "slug": "motorcycle",
+            "description": "خرید و فروش موتورسیکلت",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "موتورسیکلت",
+                "slug": "motorcycle",
+                "description": "فروش موتورسیکلت",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "text", "label": "برند", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "year", "type": "number", "label": "سال تولید", "required": true, "validation": {"min": 1300, "max": 1404}},
+                  {"name": "mileage", "type": "number", "label": "کارکرد (کیلومتر)", "required": true, "validation": {"min": 0, "max": 500000}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 100000, "max": 1000000000}}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "کالای دیجیتال",
+        "slug": "digital-goods",
+        "description": "خرید و فروش کالاهای دیجیتال",
+        "parentId": null,
+        "formFields": null,
+        "children": [
+          {
+            "title": "موبایل و تبلت",
+            "slug": "mobile-tablet",
+            "description": "خرید و فروش موبایل و تبلت",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "گوشی موبایل",
+                "slug": "mobile-phone",
+                "description": "فروش گوشی موبایل",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "select", "label": "برند", "required": true, "options": ["سامسونگ", "اپل", "شیائومی", "نوکیا", "هواوی"]},
+                  {"name": "model", "type": "text", "label": "مدل", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s-]{2,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 100000, "max": 1000000000}}
+                ]
+              },
+              {
+                "title": "تبلت",
+                "slug": "tablet",
+                "description": "فروش تبلت",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "select", "label": "برند", "required": true, "options": ["سامسونگ", "اپل", "هواوی", "لنوو"]},
+                  {"name": "model", "type": "text", "label": "مدل", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s-]{2,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 100000, "max": 1000000000}}
+                ]
+              }
+            ]
+          },
+          {
+            "title": "رایانه",
+            "slug": "computer",
+            "description": "خرید و فروش رایانه",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "لپ‌تاپ",
+                "slug": "laptop",
+                "description": "فروش لپ‌تاپ",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "select", "label": "برند", "required": true, "options": ["دل", "اچ‌پی", "لنوو", "ایسوس", "اپل"]},
+                  {"name": "model", "type": "text", "label": "مدل", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s-]{2,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 1000000000}}
+                ]
+              },
+              {
+                "title": "کامپیوتر رومیزی",
+                "slug": "desktop",
+                "description": "فروش کامپیوتر رومیزی",
+                "parentId": null,
+                "formFields": [
+                  {"name": "cpu", "type": "text", "label": "پردازنده", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s-]{2,50}$"}},
+                  {"name": "ram", "type": "number", "label": "رم (گیگابایت)", "required": true, "validation": {"min": 1, "max": 256}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 1000000000}}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "خانه و آشپزخانه",
+        "slug": "home-kitchen",
+        "description": "خرید و فروش وسایل خانه و آشپزخانه",
+        "parentId": null,
+        "formFields": null,
+        "children": [
+          {
+            "title": "لوازم خانگی برقی",
+            "slug": "appliances",
+            "description": "فروش لوازم خانگی برقی",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "یخچال و فریزر",
+                "slug": "refrigerator",
+                "description": "فروش یخچال و فریزر",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "text", "label": "برند", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "capacity", "type": "number", "label": "ظرفیت (لیتر)", "required": true, "validation": {"min": 50, "max": 1000}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 100000000}}
+                ]
+              },
+              {
+                "title": "ماشین لباسشویی",
+                "slug": "washing-machine",
+                "description": "فروش ماشین لباسشویی",
+                "parentId": null,
+                "formFields": [
+                  {"name": "brand", "type": "text", "label": "برند", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "capacity", "type": "number", "label": "ظرفیت (کیلوگرم)", "required": true, "validation": {"min": 5, "max": 20}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000000, "max": 100000000}}
+                ]
+              }
+            ]
+          },
+          {
+            "title": "ظروف و لوازم آشپزخانه",
+            "slug": "kitchenware",
+            "description": "فروش ظروف و لوازم آشپزخانه",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "ظروف آشپزی",
+                "slug": "cookware",
+                "description": "فروش ظروف آشپزی",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع ظرف", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "material", "type": "select", "label": "جنس", "required": true, "options": ["استیل", "چدن", "سرامیک"]},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 10000, "max": 10000000}}
+                ]
+              },
+              {
+                "title": "لوازم آشپزخانه",
+                "slug": "kitchen-tools",
+                "description": "فروش لوازم آشپزخانه",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع لوازم", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 10000, "max": 10000000}}
+                ]
+              }
+            ]
+          },
+          {
+            "title": "مبلمان و دکوراسیون",
+            "slug": "furniture",
+            "description": "فروش مبلمان و دکوراسیون",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "مبلمان",
+                "slug": "furniture",
+                "description": "فروش مبلمان",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع مبلمان", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "material", "type": "select", "label": "جنس", "required": true, "options": ["چوب", "پارچه", "چرم"]},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 100000, "max": 100000000}}
+                ]
+              },
+              {
+                "title": "دکوراسیون",
+                "slug": "decor",
+                "description": "فروش دکوراسیون",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع دکور", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 10000, "max": 10000000}}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "وسایل شخصی",
+        "slug": "personal-items",
+        "description": "خرید و فروش وسایل شخصی",
+        "parentId": null,
+        "formFields": null,
+        "children": [
+          {
+            "title": "کیف، کفش و لباس",
+            "slug": "clothing",
+            "description": "خرید و فروش کیف، کفش و لباس",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "لباس",
+                "slug": "clothes",
+                "description": "فروش لباس",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع لباس", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "size", "type": "select", "label": "سایز", "required": true, "options": ["S", "M", "L", "XL", "XXL"]},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000, "max": 10000000}}
+                ]
+              },
+              {
+                "title": "کفش",
+                "slug": "shoes",
+                "description": "فروش کفش",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع کفش", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "size", "type": "number", "label": "سایز", "required": true, "validation": {"min": 20, "max": 50}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000, "max": 10000000}}
+                ]
+              },
+              {
+                "title": "کیف",
+                "slug": "bags",
+                "description": "فروش کیف",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع کیف", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "کارکرده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000, "max": 10000000}}
+                ]
+              }
+            ]
+          },
+          {
+            "title": "لوازم آرایشی و بهداشتی",
+            "slug": "cosmetics",
+            "description": "خرید و فروش لوازم آرایشی و بهداشتی",
+            "parentId": null,
+            "formFields": null,
+            "children": [
+              {
+                "title": "لوازم آرایشی",
+                "slug": "makeup",
+                "description": "فروش لوازم آرایشی",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع لوازم", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "brand", "type": "text", "label": "برند", "required": false, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{0,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "استفاده‌شده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000, "max": 10000000}}
+                ]
+              },
+              {
+                "title": "لوازم بهداشتی",
+                "slug": "hygiene",
+                "description": "فروش لوازم بهداشتی",
+                "parentId": null,
+                "formFields": [
+                  {"name": "type", "type": "text", "label": "نوع لوازم", "required": true, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{2,50}$"}},
+                  {"name": "brand", "type": "text", "label": "برند", "required": false, "validation": {"pattern": "^[آ-یa-zA-Z0-9\\s]{0,50}$"}},
+                  {"name": "condition", "type": "select", "label": "وضعیت", "required": true, "options": ["نو", "استفاده‌شده"]},
+                  {"name": "price", "type": "number", "label": "قیمت (تومان)", "required": true, "validation": {"min": 1000, "max": 10000000}}
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
