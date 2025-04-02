@@ -32,7 +32,7 @@ export default function AppInit(app: NestExpressApplication) {
   // Global pipes and interceptors
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
-    forbidNonWhitelisted: true,
+    // forbidNonWhitelisted: true,
     transform: true,
     transformOptions: {
       enableImplicitConversion: true

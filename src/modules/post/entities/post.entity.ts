@@ -56,7 +56,7 @@ export class PostEntity extends BaseEntity {
   @Column({default:true})
   allowChatMessages:boolean
   @CreateDateColumn()
-  cteated_at: Date;
+  created_at: Date;
   @UpdateDateColumn()
   updated_at: Date;
 

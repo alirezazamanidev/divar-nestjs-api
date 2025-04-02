@@ -13,7 +13,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UploadFileS3 } from 'src/common/interceptors/upload-file.interceptor';
-import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ContentType } from 'src/common/enums';
 
 @Controller('category')
@@ -35,28 +35,12 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
-  // @Get()
-  // findAll(): Promise<Category[]> {
-  //   return this.categoryService.findAll();
-  // }
+  @Get('list')
+  @ApiQuery({name:'slug',required:false})
+  listCategories(@Query('slug') slug:string){
 
-  // @Get('search')
-  // search(@Query('q') query: string): Promise<Category[]> {
-  //   return this.categoryService.search(query);
-  // }
-
-  @Get('seed')
-  seed(){
-    return this.categoryService.seed();
+    return this.categoryService.listCategories(slug)
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string){
-    return this.categoryService.findOne(id);
-  }
-
-  // @Get(':id/hierarchy')
-  // getFullHierarchy(@Param('id', ParseUUIDPipe) id: string): Promise<Category> {
-  //   return this.categoryService.getFullHierarchy(id);
-  // }
+  
 }
