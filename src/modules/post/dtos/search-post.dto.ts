@@ -22,18 +22,7 @@ export enum SortByEnum {
   EXPENSIVE = 'expensive',
 }
 
-// Price range interface
-export class PriceRangeDto {
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  min?: number;
 
-  @ApiProperty({ required: false })
-  @IsNumber()
-  @IsOptional()
-  max?: number;
-}
 
 // ترکیب کردن PostFiltersDto و PaginationDto
 export class SearchPostDto  {
@@ -106,19 +95,13 @@ export class SearchPostDto  {
   
   @ApiProperty({
     description: 'Filter by price range',
-    type: PriceRangeDto,
+    example:"300000-40000000",
     required: false,
-    example: { min: 1000000, max: 5000000 }
   })
-  @IsObject()
   @IsOptional()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return JSON.parse(value);
-    }
-    return value;
-  })
-  priceRange?: PriceRangeDto;
+  @IsString()
+
+  priceRange?: string;
   
 
   @ApiProperty({

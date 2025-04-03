@@ -497,7 +497,6 @@ export class PostService {
       search,
       sortBy,
       priceRange,
-
       chat,
       hasImage,
     } = filterDto;
@@ -538,19 +537,22 @@ export class PostService {
 
     // Filter by price range
     if (priceRange) {
-      if (priceRange.min !== undefined) {
+      const [min, max] = priceRange.split('-');
+      
+      if (min && !isNaN(Number(min))) {
         queryBuilder.andWhere(
-          'JSON_EXTRACT(post.options, "$.price") >= :minPrice',
+          '(CAST(JSON_EXTRACT(post.options, "$.price") AS UNSIGNED) >= :minPrice OR CAST(JSON_EXTRACT(post.options, "$.deposit") AS UNSIGNED) >= :minPrice)',
           {
-            minPrice: priceRange.min,
+            minPrice: Number(min),
           },
         );
       }
-      if (priceRange.max !== undefined) {
+      
+      if (max && !isNaN(Number(max))) {
         queryBuilder.andWhere(
-          'JSON_EXTRACT(post.options, "$.price") <= :maxPrice',
+          '(CAST(JSON_EXTRACT(post.options, "$.price") AS UNSIGNED) <= :maxPrice OR CAST(JSON_EXTRACT(post.options, "$.deposit") AS UNSIGNED) <= :maxPrice)',
           {
-            maxPrice: priceRange.max,
+            maxPrice: Number(max),
           },
         );
       }
