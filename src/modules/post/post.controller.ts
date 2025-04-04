@@ -73,4 +73,9 @@ export class PostController {
     
     return this.postService.searchPosts(searchParams, paginationDto);
   }
+  @ApiOperation({summary:'get post by slug'})
+  @Get('get-by-slug/:slug')
+  getPostBySlug(@Param('slug') slug:string){
+    return this.postService.getPostBySlug(slug)
+  }
 }

@@ -11,11 +11,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PostEntity } from './entities/post.entity';
 import {
   DataSource,
-  FindOptions,
   FindOptionsWhere,
   Repository,
-  In,
-  QueryBuilder,
+
   SelectQueryBuilder,
 } from 'typeorm';
 import { S3Service } from 'src/app/plugins/s3.service';
@@ -250,186 +248,6 @@ export class PostService {
     return results;
   }
 
-  // متد جدید برای نمایش دسته‌بندی‌های اصلی (شبیه صفحه اصلی دیوار)
-  async getMainCategories() {
-    // دریافت همه دسته‌بندی‌های اصلی (دسته‌هایی که parentId ندارند)
-    const mainCategories = await this.datasource.manager.find(CategoryEntity, {
-      where: { parentId: IsNull() },
-    });
-
-    const result: {
-      category: CategoryEntity;
-      postCount: number;
-      hasFormFields: boolean;
-    }[] = [];
-
-    for (const category of mainCategories) {
-      // شمارش تعداد آگهی‌های این دسته
-      const postCount = await this.postRepository.count({
-        where: { categoryId: category.id },
-      });
-
-      // بررسی آیا خود دسته یا زیردسته‌های آن formFields دارند
-      const hasFormFields =
-        category.formFields && category.formFields.length > 0;
-      let hasSubcategoryWithFormFields = false;
-
-      if (!hasFormFields) {
-        // بررسی زیردسته‌های سطح 2
-        const level2Categories = await this.datasource.manager.find(
-          CategoryEntity,
-          {
-            where: { parentId: category.id },
-          },
-        );
-
-        for (const level2 of level2Categories) {
-          if (level2.formFields && level2.formFields.length > 0) {
-            hasSubcategoryWithFormFields = true;
-            break;
-          }
-
-          // بررسی زیردسته‌های سطح 3
-          const level3Categories = await this.datasource.manager.find(
-            CategoryEntity,
-            {
-              where: { parentId: level2.id },
-            },
-          );
-
-          for (const level3 of level3Categories) {
-            if (level3.formFields && level3.formFields.length > 0) {
-              hasSubcategoryWithFormFields = true;
-              break;
-            }
-          }
-
-          if (hasSubcategoryWithFormFields) break;
-        }
-      }
-
-      // فقط دسته‌هایی را اضافه کن که خود یا زیردسته‌های آنها formFields داشته باشند
-      if (hasFormFields || hasSubcategoryWithFormFields) {
-        result.push({
-          category,
-          postCount,
-          hasFormFields: hasFormFields || hasSubcategoryWithFormFields,
-        });
-      }
-    }
-
-    return result;
-  }
-
-  // متد جدید برای دریافت همه دسته‌بندی‌ها و زیردسته‌های آنها (برای نمایش کامل)
-  async getAllCategoriesWithHierarchy() {
-    // دریافت همه دسته‌بندی‌های اصلی
-    const mainCategories = await this.datasource.manager.find(CategoryEntity, {
-      where: { parentId: IsNull() },
-    });
-
-    const result: {
-      category: CategoryEntity;
-      hasFormFields: boolean;
-      children: {
-        category: CategoryEntity;
-        hasFormFields: boolean;
-        children: {
-          category: CategoryEntity;
-          hasFormFields: boolean;
-        }[];
-      }[];
-      postCount: number;
-    }[] = [];
-
-    for (const mainCategory of mainCategories) {
-      const level2Categories = await this.datasource.manager.find(
-        CategoryEntity,
-        {
-          where: { parentId: mainCategory.id },
-          relations: ['icon'],
-        },
-      );
-
-      const level2WithChildren: {
-        category: CategoryEntity;
-        hasFormFields: boolean;
-        children: {
-          category: CategoryEntity;
-          hasFormFields: boolean;
-        }[];
-      }[] = [];
-
-      for (const level2 of level2Categories) {
-        const level3Categories = await this.datasource.manager.find(
-          CategoryEntity,
-          {
-            where: { parentId: level2.id },
-            relations: ['icon'],
-          },
-        );
-
-        level2WithChildren.push({
-          category: level2,
-          hasFormFields: level2.formFields && level2.formFields.length > 0,
-          children: level3Categories.map((level3) => ({
-            category: level3,
-            hasFormFields: level3.formFields && level3.formFields.length > 0,
-          })),
-        });
-      }
-
-      // شمارش تعداد آگهی‌های این دسته
-      const postCount = await this.postRepository.count({
-        where: { categoryId: mainCategory.id },
-      });
-
-      result.push({
-        category: mainCategory,
-        hasFormFields:
-          mainCategory.formFields && mainCategory.formFields.length > 0,
-        children: level2WithChildren,
-        postCount,
-      });
-    }
-
-    return result;
-  }
-
-  // متد جدید برای پیشنهاد دسته‌بندی برای ایجاد آگهی
-  async suggestCategoryForNewPost() {
-    // دریافت دسته‌بندی‌های پربازدید یا محبوب
-    // در اینجا ما ساده‌سازی کرده و دسته‌بندی‌های اصلی را که بیشترین آگهی را دارند بر می‌گردانیم
-
-    // دریافت همه دسته‌بندی‌های اصلی
-    const mainCategories = await this.datasource.manager.find(CategoryEntity, {
-      where: { parentId: IsNull() },
-    });
-
-    const categoriesWithPostCount: {
-      category: CategoryEntity;
-      postCount: number;
-    }[] = [];
-
-    // محاسبه تعداد آگهی برای هر دسته‌بندی
-    for (const category of mainCategories) {
-      const postCount = await this.postRepository.count({
-        where: { categoryId: category.id },
-      });
-
-      categoriesWithPostCount.push({ category, postCount });
-    }
-
-    // مرتب‌سازی بر اساس تعداد آگهی (نزولی)
-    categoriesWithPostCount.sort((a, b) => b.postCount - a.postCount);
-
-    // برگرداندن 5 دسته‌بندی اول (یا تمام آنها، اگر کمتر از 5 دسته‌بندی وجود دارد)
-    return categoriesWithPostCount.slice(0, 5).map((item) => ({
-      ...item,
-      hasFormFields:
-        item.category.formFields && item.category.formFields.length > 0,
-    }));
-  }
 
   private validateFormData(
     formData: Record<string, any>,
@@ -675,5 +493,40 @@ export class PostService {
           break;
       }
     }
+  }
+  async getPostBySlug(slug: string) {
+    const post = await this.postRepository.findOne({
+      where: { slug, isActive: true, status: StatusEnum.Published },
+      relations: { category: true },
+      select: {
+        category: {
+          id: true,
+          title: true,
+          slug: true,
+          formFields: true
+        }
+      }
+    });
+    
+    if (!post) throw new NotFoundException(NotFoundMessages.Post);
+    
+    // Transform options based on formFields
+    if (post.category?.formFields && post.options) {
+      const formFields = post.category.formFields
+      const transformedOptions = {};
+      
+      for (const field of formFields) {
+        if (field.name && field.label && post.options[field.name] !== undefined) {
+          transformedOptions[field.label] = post.options[field.name];
+        }
+      }
+      
+      post.options = transformedOptions;
+    }
+  
+  
+    return {
+      post
+    };
   }
 }
