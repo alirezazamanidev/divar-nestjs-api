@@ -497,8 +497,12 @@ export class PostService {
   async getPostBySlug(slug: string) {
     const post = await this.postRepository.findOne({
       where: { slug, isActive: true, status: StatusEnum.Published },
-      relations: { category: true },
+      relations: { category: true ,user:true},
       select: {
+        user:{
+          id:true,
+          phone:true
+        },
         category: {
           id: true,
           title: true,

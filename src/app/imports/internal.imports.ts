@@ -1,7 +1,7 @@
-
 import { ExceptionModule } from 'src/common/filters/exception.module';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { CategoryModule } from 'src/modules/category/category.module';
+import { ChatModule } from 'src/modules/chat/chat.module';
 import { PostModule } from 'src/modules/post/post.module';
 
 import { UserModule } from 'src/modules/user/user.module';
@@ -12,6 +12,7 @@ export const appInternalImports = [
   UserModule,
   PostModule,
   CategoryModule,
+  ChatModule,
   ExceptionModule
   
 ];
