@@ -41,6 +41,10 @@ export class ChatGateway {
   }
 
 
+  @SubscribeMessage('joinRoom')
+  async joinRoom(@ConnectedSocket() client:Socket,@MessageBody() data:JoinRoomDto){
+    client.join(data.roomId);
+  }
   
 
 
