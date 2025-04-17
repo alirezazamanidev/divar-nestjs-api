@@ -10,6 +10,10 @@ import { MessageEntity } from "./message.entity";
 export class ChatEntity extends BaseEntity{
     @Column()
     postId: string;
+    @Column()
+    senderId: string;
+    @Column()
+    receiverId: string;
   
     @ManyToOne(() => PostEntity,{ onDelete: 'CASCADE' })
     post: PostEntity;

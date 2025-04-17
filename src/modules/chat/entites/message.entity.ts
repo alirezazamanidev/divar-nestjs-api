@@ -14,7 +14,7 @@ export class MessageEntity extends BaseEntity {
   @Column()
   roomId:string
   @Column()
-  sentAt: string;
+  sentAt: Date
   @Column({default:false})
   isRead:boolean
   @Column({nullable:true})
