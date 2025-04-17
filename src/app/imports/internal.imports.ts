@@ -12,7 +12,7 @@ export const appInternalImports = [
   UserModule,
   PostModule,
   CategoryModule,
-  ChatModule,
-  ExceptionModule
+  ExceptionModule,
+  ChatModule
   
 ];
