@@ -1,12 +1,12 @@
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WsException } from '@nestjs/websockets';
 import { isJWT } from 'class-validator';
 import { parse } from 'cookie';
 import { Server, Socket } from 'socket.io';
 import { JWTPayload } from '../auth/types/payload.type';
-import { CreateRoomDto } from './dtos/create-chat.dto';
-import { SendMessageDto } from './dtos/send-message.dto';
+import { CreateRoomDto, JoinRoomDto, LeaveRoomDto } from './dtos/chat.dto';
+import { SendMessageDto } from './dtos/message.dto';
 import { ChatService } from './services/chat.service';
 import { MessageService } from './services/message.service';
 
@@ -43,9 +43,22 @@ export class ChatGateway {
 
   @SubscribeMessage('joinRoom')
   async joinRoom(@ConnectedSocket() client:Socket,@MessageBody() data:JoinRoomDto){
-    client.join(data.roomId);
+   
+    const room=await this.chatService.getRoomDetails(data.roomId);
+    if(!room.isActive){
+      throw new WsException('Room is blocked');
+    }
+
+    const messages=await this.messageService.getRecentMessages(data.roomId);
+
+    client.join(`room_${data.roomId}`);
+    client.to(`room_${data.roomId}`).emit('messages',messages);
   }
   
+  @SubscribeMessage('leaveRoom')
+  async leaveRoom(@ConnectedSocket() client:Socket,@MessageBody() data:LeaveRoomDto){
+    client.leave(`room_${data.roomId}`);
+  }
 
 
 
@@ -53,15 +66,18 @@ export class ChatGateway {
   async sendMessage(@ConnectedSocket() client:Socket,@MessageBody() data:SendMessageDto){
     const user=client.data.user as JWTPayload;
     const room= await this.chatService.createRoom({postId:data.postId},user.userId);
+   
+    
     const message= await this.messageService.createMessage({
       roomId:room.id,
       senderId:user.userId,
       message:data.message
     })
-    this.server.to(room.id).emit('newMessage',message);
+    this.server.to(`room_${room.id}`).emit('newMessage',message);
     // send notification to receiver
     
     this.notification(client,room.receiverId,{type:'newMessage',data:message})
+    return room;
   }
 
 

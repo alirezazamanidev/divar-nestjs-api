@@ -5,7 +5,7 @@ import { Column, Entity, Index, ManyToOne } from 'typeorm';
 import { ChatEntity } from './chat.entity';
 
 @Entity(EntityNameEnum.ChatMessage)
-@Index(['senderId','roomId'], { unique: true })
+
 export class MessageEntity extends BaseEntity {
   @Column()
   text: string;
