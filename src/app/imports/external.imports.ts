@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { createKeyv } from '@keyv/redis';
 import { TypeOrmDbConfig } from 'src/configs/typeOrrm.config';
+import { BullModule } from '@nestjs/bull';
 
 /**
  * External module imports configuration for the application
@@ -12,7 +13,7 @@ export const appExternalImports = [
   // Load environment variables from .env file
   ConfigModule.forRoot({
     isGlobal: true,
-    cache: true
+    cache: true,
   }),
 
   // Configure Redis cache
@@ -23,11 +24,11 @@ export const appExternalImports = [
       stores: [
         createKeyv(
           `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-         
         ),
       ],
     }),
   }),
+
 
   // Configure TypeORM database connection
   TypeOrmModule.forRootAsync({

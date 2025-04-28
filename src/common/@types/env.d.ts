@@ -46,5 +46,7 @@ declare namespace NodeJS {
     LIARA_SECRET_KEY: string;
     LIARA_REGION: string;
     LIARA_ENDPOINT: string;
+    // Ai 
+    OPENAI_API_KEY:string
   }
 }

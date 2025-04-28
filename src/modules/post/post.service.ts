@@ -13,7 +13,6 @@ import {
   DataSource,
   FindOptionsWhere,
   Repository,
-
   SelectQueryBuilder,
 } from 'typeorm';
 import { S3Service } from 'src/app/plugins/s3.service';
@@ -38,10 +37,14 @@ import {
   paginationGenerator,
   paginationSolver,
 } from 'src/common/utils/pagination.utils';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 @Injectable({ scope: Scope.REQUEST })
 export class PostService {
   constructor(
     private readonly DataSource: DataSource,
+    @InjectQueue('moderation')
+    private readonly moderationQueue: Queue,
     @Inject(REQUEST) private readonly request: Request,
     @InjectRepository(PostEntity)
     private readonly postRepository: Repository<PostEntity>,
@@ -105,6 +108,15 @@ export class PostService {
 
       // Save the post to the database
       const savedPost = await manager.save(post);
+
+      await this.moderationQueue.add('moderate-post', {
+        postId: savedPost.id,
+      },{
+        attempts:3,
+        backoff:{type:'fixed',delay:3000},
+        removeOnComplete:true,
+        removeOnFail:false
+      });
       return {
         message: 'created!',
       };
@@ -153,6 +165,9 @@ export class PostService {
       category,
       showBack,
     };
+  }
+  async findOneById(id:string){
+    
   }
   async getOne(id: string) {
     const post = await this.postRepository.findOne({
@@ -247,7 +262,6 @@ export class PostService {
 
     return results;
   }
-
 
   private validateFormData(
     formData: Record<string, any>,
@@ -356,7 +370,7 @@ export class PostService {
     // Filter by price range
     if (priceRange) {
       const [min, max] = priceRange.split('-');
-      
+
       if (min && !isNaN(Number(min))) {
         queryBuilder.andWhere(
           '(CAST(JSON_EXTRACT(post.options, "$.price") AS UNSIGNED) >= :minPrice OR CAST(JSON_EXTRACT(post.options, "$.deposit") AS UNSIGNED) >= :minPrice)',
@@ -365,7 +379,7 @@ export class PostService {
           },
         );
       }
-      
+
       if (max && !isNaN(Number(max))) {
         queryBuilder.andWhere(
           '(CAST(JSON_EXTRACT(post.options, "$.price") AS UNSIGNED) <= :maxPrice OR CAST(JSON_EXTRACT(post.options, "$.deposit") AS UNSIGNED) <= :maxPrice)',
@@ -466,7 +480,6 @@ export class PostService {
             queryBuilder.andWhere(`${jsonPath} = :${fieldName}`, {
               [fieldName]: value,
             });
- 
           }
           break;
 
@@ -484,9 +497,6 @@ export class PostService {
           break;
 
         case 'checkbox':
-         
-         
-          
           queryBuilder.andWhere(`${jsonPath} = :${fieldName}`, {
             [fieldName]: !!value,
           });
@@ -497,40 +507,43 @@ export class PostService {
   async getPostBySlug(slug: string) {
     const post = await this.postRepository.findOne({
       where: { slug, isActive: true, status: StatusEnum.Published },
-      relations: { category: true ,user:true},
+      relations: { category: true, user: true },
       select: {
-        user:{
-          id:true,
-          phone:true
+        user: {
+          id: true,
+          phone: true,
         },
         category: {
           id: true,
           title: true,
           slug: true,
-          formFields: true
-        }
-      }
+          formFields: true,
+        },
+      },
     });
-    
+
     if (!post) throw new NotFoundException(NotFoundMessages.Post);
-    
+
     // Transform options based on formFields
     if (post.category?.formFields && post.options) {
-      const formFields = post.category.formFields
+      const formFields = post.category.formFields;
       const transformedOptions = {};
-      
+
       for (const field of formFields) {
-        if (field.name && field.label && post.options[field.name] !== undefined) {
+        if (
+          field.name &&
+          field.label &&
+          post.options[field.name] !== undefined
+        ) {
           transformedOptions[field.label] = post.options[field.name];
         }
       }
-      
+
       post.options = transformedOptions;
     }
-  
-  
+
     return {
-      post
+      post,
     };
   }
 }
