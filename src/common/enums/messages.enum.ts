@@ -28,6 +28,7 @@ export enum PublicMessage {
   SendOtp = 'کد تایید با موفقیت ایجاد شد!',
   LoggedIn = 'ورود با موفقیت انجام شد!',
   Created='با موفقیت ایجاد شد!',
+  Created_Post='آگهی شما با موفقیت ساخته شد و در صف انتشار قرار گرفت',
   Updated='تغییرات اعمال شد!',
   Removed='حذف شد!',
   UploadAvatar='پروفایل شما ثبت شد',

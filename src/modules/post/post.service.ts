@@ -21,6 +21,7 @@ import {
   ConflictMessages,
   EntityNameEnum,
   NotFoundMessages,
+  PublicMessage,
   StatusEnum,
 } from 'src/common/enums';
 import { createSlug } from 'src/common/utils/function.util';
@@ -37,14 +38,11 @@ import {
   paginationGenerator,
   paginationSolver,
 } from 'src/common/utils/pagination.utils';
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
 @Injectable({ scope: Scope.REQUEST })
 export class PostService {
   constructor(
     private readonly DataSource: DataSource,
-    @InjectQueue('moderation')
-    private readonly moderationQueue: Queue,
+
     @Inject(REQUEST) private readonly request: Request,
     @InjectRepository(PostEntity)
     private readonly postRepository: Repository<PostEntity>,
@@ -62,7 +60,10 @@ export class PostService {
   async createPost(postDto: CreatePostDto, mediaFiles: Express.Multer.File[]) {
     return await this.DataSource.transaction(async (manager) => {
       // check post already exist
-      await this.checkExistPost(postDto.title, this.request.user.id);
+      const Existpost = await manager.findOne(PostEntity, {
+        where: { title: postDto.title, userId: this.request.user.id },
+      });
+      if(Existpost) throw new ConflictException(ConflictMessages.post);
       // check if category exist and check formData is valid
       const category = await this.categoryService.findOne(postDto.categoryId);
       this.validateFormData(postDto.options, category.formFields);
@@ -107,18 +108,9 @@ export class PostService {
       }
 
       // Save the post to the database
-      const savedPost = await manager.save(post);
-
-      await this.moderationQueue.add('moderate-post', {
-        postId: savedPost.id,
-      },{
-        attempts:3,
-        backoff:{type:'fixed',delay:3000},
-        removeOnComplete:true,
-        removeOnFail:false
-      });
+      await manager.save(post);
       return {
-        message: 'created!',
+        message: PublicMessage.Created_Post,
       };
     });
   }
@@ -166,9 +158,7 @@ export class PostService {
       showBack,
     };
   }
-  async findOneById(id:string){
-    
-  }
+  async findOneById(id: string) {}
   async getOne(id: string) {
     const post = await this.postRepository.findOne({
       where: { id },

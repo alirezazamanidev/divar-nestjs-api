@@ -13,6 +13,7 @@ export const appExternalImports = [
   // Load environment variables from .env file
   ConfigModule.forRoot({
     isGlobal: true,
+    envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     cache: true,
   }),
 
