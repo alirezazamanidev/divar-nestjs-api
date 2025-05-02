@@ -1,14 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UserEntity } from '../user/entities/user.entity';
-import { TokenService } from './token.service';
+
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { Response } from 'express';
 import { AuthMessages, ForbiddenMessage, PublicMessage } from 'src/common/enums';
+import { AuthService } from '../auth.service';
+import { UserEntity } from 'src/modules/user/entities/user.entity';
+import { TokenService } from '../token.service';
 
 describe('AuthService', () => {
   let service: AuthService;
