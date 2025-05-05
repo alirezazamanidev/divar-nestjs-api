@@ -109,7 +109,7 @@ export class CategoryService {
     category = await this.categoryRepository.save(category);
 
     return {
-      messsge: PublicMessage.Created,
+      message: PublicMessage.Created,
     };
   }
 
