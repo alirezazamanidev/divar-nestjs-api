@@ -1,8 +1,8 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Auth } from '../auth/decorators';
-import { LoginDto } from './dto/admin.dto';
-import { AdminService } from './admIn.service';
+import { Auth } from '../../auth/decorators';
+import { LoginDto } from '../dto/admin.dto';
+import { AdminService } from '../services/admIn.service';
 import { Response } from 'express';
 import { ContentType } from 'src/common/enums';
 
