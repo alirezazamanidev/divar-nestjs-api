@@ -1,12 +1,12 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import slugify from 'slugify';
 import { ConflictMessages, NotFoundMessages, PublicMessage } from 'src/common/enums';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, DeepPartial, Repository } from 'typeorm';
 import { CreateCategoryDto } from '../dto/category.dto';
 import { S3Service } from 'src/app/plugins/s3.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from 'src/modules/category/entities/category.entity';
-
+import * as categoryData from 'src/database/seeds/category.seed.json'
 @Injectable()
 export class CategoryService {
   constructor(
@@ -15,6 +15,40 @@ export class CategoryService {
     private readonly dataSource: DataSource,
     private readonly s3Service: S3Service,
   ) {}
+  async seed() {
+    // Process top-level categories
+    for (const category of categoryData.categories) {
+      await this.createCategoryWithChildren(category);
+    }
+
+    return { success: true, message: 'Categories seeded successfully' };
+  }
+
+  private async createCategoryWithChildren(
+    categoryData: any,
+    parent?: CategoryEntity,
+  ): Promise<CategoryEntity> {
+    // Create category without children first
+    const categoryToCreate: DeepPartial<CategoryEntity> = {
+      title: categoryData.title,
+      slug: categoryData.slug,
+      description: categoryData.description,
+      formFields: categoryData.formFields,
+      parent: parent,
+    };
+
+    // Save the category to get an ID
+    const savedCategory = await this.categoryRepository.save(categoryToCreate);
+
+    // Process children if they exist
+    if (categoryData.children && categoryData.children.length > 0) {
+      for (const childData of categoryData.children) {
+        await this.createCategoryWithChildren(childData, savedCategory);
+      }
+    }
+
+    return savedCategory;
+  }
 
   async create(createCategoryDto: CreateCategoryDto) {
     const { parentId, title, description, icon, formFields } =

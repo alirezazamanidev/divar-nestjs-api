@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -29,4 +30,10 @@ export class CategoryController {
 
     return this.categoryService.create(createCategoryDto);
   }
+
+
+    @Get('seed')
+    seed(){
+      return this.categoryService.seed()
+    }
 }
