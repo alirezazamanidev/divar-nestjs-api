@@ -21,10 +21,10 @@ export class PostEntity extends BaseEntity {
   categoryId: string;
   @Column()
   userId: string;
-  @Index('IDX_post_title_fulltext', { fulltext: true })
+ 
   @Column({ unique: true })
   title: string;
-  @Index('IDX_post_slug_fulltext', { fulltext: true })
+
   @Column({ unique: true })
   slug: string;
   @Column({ type: 'text' })
@@ -54,6 +54,7 @@ export class PostEntity extends BaseEntity {
     lng: number;
   };
   @Column({default:true})
+  
   allowChatMessages:boolean
   @CreateDateColumn()
   created_at: Date;

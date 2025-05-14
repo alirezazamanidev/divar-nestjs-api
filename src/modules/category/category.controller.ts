@@ -16,7 +16,7 @@ import { UploadFileS3 } from 'src/common/interceptors/upload-file.interceptor';
 import { ApiConsumes, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ContentType } from 'src/common/enums';
 
-@Controller('category')
+@Controller('')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 

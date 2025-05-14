@@ -22,7 +22,7 @@ import { SearchPostDto } from './dtos/search-post.dto';
 import { PaginationDto } from 'src/common/dtos/paginationQuery.dto';
 import { ApiPaginationQuery } from 'src/common/decorators';
 
-@Controller('post')
+@Controller('')
 export class PostController {
   private readonly logger = new Logger(PostController.name);
   constructor(private readonly postService: PostService) {}

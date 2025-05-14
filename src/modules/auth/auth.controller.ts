@@ -8,7 +8,7 @@ import { Auth } from './decorators';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CookieNameEnum } from 'src/common/enums';
 
-@Controller('auth')
+@Controller('')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

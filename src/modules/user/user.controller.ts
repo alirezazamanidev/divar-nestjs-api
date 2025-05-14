@@ -15,7 +15,7 @@ import { ContentType } from 'src/common/enums';
 
 @Auth()
 @ApiTags('User')
-@Controller('user')
+@Controller('')
 export class UserController {
   constructor(
     private readonly userService: UserService,
