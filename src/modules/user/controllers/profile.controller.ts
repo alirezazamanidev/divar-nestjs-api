@@ -7,20 +7,18 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Auth } from '../auth/decorators';
-import { UpdateProfileDto, UploadAvatarDTo } from './dto/user.dto';
+import { Auth } from '../../auth/decorators';
+import { UpdateProfileDto, UploadAvatarDTo } from '../dto/user.dto';
 import { ContentType } from 'src/common/enums';
+import { ProfileService } from '../services/profile.service';
 
 @Auth()
 @ApiTags('User')
 @Controller('')
-export class UserController {
-  constructor(
-    private readonly userService: UserService,
-  ) {}
-
+export class ProfileController {
+  constructor(private readonly profileService:ProfileService) {}
 
   @Post('update-profile')
   @ApiOperation({
@@ -30,7 +28,7 @@ export class UserController {
   })
   @ApiConsumes(ContentType.UrlEncoded, ContentType.Json)
   async updateProfile(@Body() updateProfileDto: UpdateProfileDto) {
-    return this.userService.updateProfile(updateProfileDto);
+    return this.profileService.updateProfile(updateProfileDto);
   }
 
   // @Post('upload-avatar')

@@ -6,8 +6,7 @@ import {
   NotFoundException,
   Scope,
 } from '@nestjs/common';
-import { UserEntity } from './entities/user.entity';
-import { UpdateProfileDto } from './dto/user.dto';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Not, Repository } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
@@ -17,9 +16,11 @@ import {
   PublicMessage,
 } from 'src/common/enums';
 import { existsSync, unlinkSync } from 'fs';
+import { UserEntity } from '../entities/user.entity';
+import { UpdateProfileDto } from '../dto/user.dto';
 
 @Injectable({ scope: Scope.REQUEST })
-export class UserService {
+export class ProfileService {
   constructor(
     @Inject(REQUEST) private request: Request,
     @InjectRepository(UserEntity)
