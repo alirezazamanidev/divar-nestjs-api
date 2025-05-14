@@ -3,6 +3,6 @@ export enum EntityNameEnum {
   Category = "category",
   Post='post',
   Address='address',
-  ChatRoom='chat_room',
-  ChatMessage='chat_message'
+  ChatRoom='room',
+  ChatMessage='message'
 }

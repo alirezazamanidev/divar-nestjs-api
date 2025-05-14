@@ -17,6 +17,12 @@ export class SendMessageDto {
     @IsUUID()
     postId: string;
     @IsNotEmpty()
+    @IsUUID()
+    buyerId:string
+    @IsNotEmpty()
+    @IsUUID()
+    sellerId:string
+    @IsNotEmpty()
     @IsString()
     message: string;
 }

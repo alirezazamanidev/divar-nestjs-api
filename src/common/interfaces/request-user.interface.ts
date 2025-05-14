@@ -3,8 +3,8 @@
 export interface IUser{
     id: string
     username: string,
-    fullname: string,
-    roles:string[]
+    fullname: string
+    role:string
     email: string,
     phone: string,
     phone_verify: boolean,

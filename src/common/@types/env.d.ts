@@ -14,9 +14,7 @@ declare namespace NodeJS {
     APP_NAME: string;
     
     // Admin info
-    ADMIN_USERNAME: string;
-    ADMIN_PHONE: string;
-    
+    ADMIN_PASSEWORD:string
     // Database
     MYSQL_PORT: number;
     MYSQL_HOST: string;

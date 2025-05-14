@@ -86,7 +86,7 @@ export class AuthService {
       select: {
         id: true,
         username: true,
-        roles:true,
+        role:true,
         isBlocked:true,
         fullname: true,
     

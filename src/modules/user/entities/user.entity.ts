@@ -34,10 +34,8 @@ export class UserEntity extends BaseEntity {
   @Column({ default: false })
   phone_verify: boolean;
 
-  @Column({
-    type: 'simple-array',
-  })
-  roles: string[] = [Roles.User];
+  @Column({default:Roles.User})
+  role: string
 
   @Column({ default: false })
   isBlocked: boolean;
