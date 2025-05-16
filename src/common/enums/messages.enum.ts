@@ -33,5 +33,6 @@ export enum PublicMessage {
   Removed='حذف شد!',
   UploadAvatar='پروفایل شما ثبت شد',
   LoggedOut='خروج با موفقیت انجام شد',
-  UpdateProfile='تغییرات بر روی پروفایل شما اعمال شد!'
+  UpdateProfile='تغییرات بر روی پروفایل شما اعمال شد!',
+ 
 }

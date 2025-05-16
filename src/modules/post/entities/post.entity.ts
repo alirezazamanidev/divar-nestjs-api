@@ -35,15 +35,8 @@ export class PostEntity extends BaseEntity {
   @Column('json')
   options: Record<string, any>;
 
-  @Column({ default: false })
-  isActive: boolean;
-
   @Column({ type: 'json', nullable: true })
   mediaFiles: FileEntity[];
-  @Column({ default: false })
-  isExpired: boolean;
-  @Column({ type: 'timestamp', nullable: true })
-  expiresAt: Date;
   @Column()
   city: string;
   @Column()
@@ -54,7 +47,7 @@ export class PostEntity extends BaseEntity {
     lng: number;
   };
   @Column({default:true})
-  
+
   allowChatMessages:boolean
   @CreateDateColumn()
   created_at: Date;

@@ -41,14 +41,13 @@ import {
 @Injectable({ scope: Scope.REQUEST })
 export class PostService {
   constructor(
-    private readonly DataSource: DataSource,
 
     @Inject(REQUEST) private readonly request: Request,
     @InjectRepository(PostEntity)
     private readonly postRepository: Repository<PostEntity>,
     private readonly s3Service: S3Service,
     private readonly categoryService: CategoryService,
-    private readonly datasource: DataSource,
+    private readonly dataSource: DataSource,
   ) {}
 
   async checkExistPost(title: string, userId: string) {
@@ -58,7 +57,7 @@ export class PostService {
     if (post) throw new ConflictException(ConflictMessages.post);
   }
   async createPost(postDto: CreatePostDto, mediaFiles: Express.Multer.File[]) {
-    return await this.DataSource.transaction(async (manager) => {
+    return await this.dataSource.transaction(async (manager) => {
       // check post already exist
       const Existpost = await manager.findOne(PostEntity, {
         where: { title: postDto.title, userId: this.request.user.id },
@@ -77,7 +76,7 @@ export class PostService {
 
         slug: createSlug(postDto.title),
         options: postDto.options,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    
         city: postDto.city,
 
         province: postDto.province,
@@ -124,7 +123,7 @@ export class PostService {
 
     if (slug) {
       showBack = true;
-      category = await this.datasource.manager.findOne(CategoryEntity, {
+      category = await this.dataSource.manager.findOne(CategoryEntity, {
         where: {
           slug: slug.trim(),
         },
@@ -143,7 +142,7 @@ export class PostService {
       };
     }
 
-    const categories = await this.datasource.manager.find(CategoryEntity, {
+    const categories = await this.dataSource.manager.find(CategoryEntity, {
       where,
       select: {
         id: true,
@@ -170,7 +169,7 @@ export class PostService {
 
   async searchCategories(searchQuery: string) {
     // جستجوی دسته‌بندی‌ها بر اساس عنوان با استفاده از LIKE
-    const categories = await this.datasource.manager.find(CategoryEntity, {
+    const categories = await this.dataSource.manager.find(CategoryEntity, {
       where: searchQuery
         ? {
             title: Like(`%${searchQuery}%`),
@@ -192,7 +191,7 @@ export class PostService {
         category.formFields && category.formFields.length > 0;
 
       // بررسی زیردسته‌های سطح ۲
-      const level2Categories = await this.datasource.manager.find(
+      const level2Categories = await this.dataSource.manager.find(
         CategoryEntity,
         {
           where: { parentId: category.id },
@@ -211,7 +210,7 @@ export class PostService {
         }
 
         // بررسی زیردسته‌های سطح ۳
-        const level3Categories = await this.datasource.manager.find(
+        const level3Categories = await this.dataSource.manager.find(
           CategoryEntity,
           {
             where: { parentId: level2Category.id },
@@ -434,7 +433,7 @@ export class PostService {
   ) {
     if (!options || !categorySlug) return;
 
-    const category = await this.datasource
+    const category = await this.dataSource
       .getRepository(CategoryEntity)
       .findOne({
         where: { slug: categorySlug },
@@ -496,7 +495,7 @@ export class PostService {
   }
   async getPostBySlug(slug: string) {
     const post = await this.postRepository.findOne({
-      where: { slug, isActive: true, status: StatusEnum.Published },
+      where: { slug, status: StatusEnum.Published },
       relations: { category: true, user: true },
       select: {
         user: {
