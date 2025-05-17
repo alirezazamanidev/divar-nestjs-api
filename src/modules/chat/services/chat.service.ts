@@ -1,9 +1,15 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChatRoomEntity } from './entities/room.entity';
+import { ChatRoomEntity } from '../entities/room.entity';
 import { Repository } from 'typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import PostService from '../../post/post.service';
 
 @Injectable()
 export class ChatService {
@@ -11,6 +17,7 @@ export class ChatService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @InjectRepository(ChatRoomEntity)
     private readonly roomRepository: Repository<ChatRoomEntity>,
+    private readonly postService: PostService,
   ) {}
 
   async findOneById(id: string) {
@@ -42,9 +49,21 @@ export class ChatService {
       },
       order: { created_at: 'DESC' },
     });
-    if(rooms.length>0){
-        await this.cacheManager.set(key,rooms,3600) // 1 hours
+    if (rooms.length > 0) {
+      await this.cacheManager.set(key, rooms, 3600); // 1 hours
     }
-    return rooms
+    return rooms;
+  }
+  async createRoom(userId: string, postId: string) {
+    const post = await this.postService.findOneById(postId);
+    if (!post.allowChatMessages)
+      throw new ForbiddenException('اجازه ارسال پیام ندارید!');
+    let room = this.roomRepository.create({
+      postId,
+      sellerId: post.userId,
+      buyerId: userId,
+    });
+    room = await this.roomRepository.save(room);
+    return room;
   }
 }

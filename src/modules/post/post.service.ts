@@ -41,7 +41,6 @@ import {
 @Injectable({ scope: Scope.REQUEST })
 export default class PostService {
   constructor(
-
     @Inject(REQUEST) private readonly request: Request,
     @InjectRepository(PostEntity)
     private readonly postRepository: Repository<PostEntity>,
@@ -62,7 +61,7 @@ export default class PostService {
       const Existpost = await manager.findOne(PostEntity, {
         where: { title: postDto.title, userId: this.request.user.id },
       });
-      if(Existpost) throw new ConflictException(ConflictMessages.post);
+      if (Existpost) throw new ConflictException(ConflictMessages.post);
       // check if category exist and check formData is valid
       const category = await this.categoryService.findOne(postDto.categoryId);
       this.validateFormData(postDto.options, category.formFields);
@@ -76,7 +75,7 @@ export default class PostService {
 
         slug: createSlug(postDto.title),
         options: postDto.options,
-    
+
         city: postDto.city,
 
         province: postDto.province,
@@ -157,7 +156,13 @@ export default class PostService {
       showBack,
     };
   }
-  async findOneById(id: string) {}
+  async findOneById(id: string) {
+    const post = await this.postRepository.findOne({
+      where: { id },
+    });
+    if (!post) throw new NotFoundException(NotFoundMessages.Post);
+    return post;
+  }
   async getOne(id: string) {
     const post = await this.postRepository.findOne({
       where: { id },

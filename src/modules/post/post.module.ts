@@ -17,5 +17,6 @@ import { CategoryModule } from '../category/category.module';
     PostService,
     S3Service,
   ],
+  exports:[PostService]
 })
 export class PostModule {}
