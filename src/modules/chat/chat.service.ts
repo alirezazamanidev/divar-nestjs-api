@@ -16,12 +16,35 @@ export class ChatService {
   async findOneById(id: string) {
     const cacheKey = `chatRoom:${id}`;
     const cachedRoom = await this.cacheManager.get<ChatRoomEntity>(cacheKey);
-    if(cachedRoom) return cachedRoom
+    if (cachedRoom) return cachedRoom;
 
-    const room=await this.roomRepository.findOne({where:{id}});
-    if(!room) throw new NotFoundException('چت یافت نشد!');
-    await this.cacheManager.set(cacheKey,room,3600) // 1 hours
+    const room = await this.roomRepository.findOne({ where: { id } });
+    if (!room) throw new NotFoundException('چت یافت نشد!');
+    await this.cacheManager.set(cacheKey, room, 3600); // 1 hours
 
-    return room
+    return room;
+  }
+
+  async findAllForUser(userId: string) {
+    const key = `user-rooms:${userId}`;
+    const roomsCache = await this.cacheManager.get<ChatRoomEntity>(key);
+    if (roomsCache) return roomsCache;
+    const rooms = await this.roomRepository.find({
+      where: [{ buyerId: userId }, { sellerId: userId }],
+      relations: ['post'],
+      select: {
+        post: {
+          id: true,
+          title: true,
+          slug: true,
+          mediaFiles: true,
+        },
+      },
+      order: { created_at: 'DESC' },
+    });
+    if(rooms.length>0){
+        await this.cacheManager.set(key,rooms,3600) // 1 hours
+    }
+    return rooms
   }
 }

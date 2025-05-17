@@ -48,11 +48,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log('🔌 WebSocket Chat Gateway Initialized');
   }
 
-  handleConnection(client: Socket) {
-    
+ async handleConnection(client: Socket) {
     const payload=this.validateTokenFromCookies(client);
     client.data.user=payload;
     this.logger.log(`✅ Client connected: ${client.id}`);
+    // get all chats
+    const rooms=await this.chatService.findAllForUser(payload.userId);
+    client.emit('get-chats',rooms);
   }
   handleDisconnect(client: Socket) {
     this.logger.log(`❌ Client disconnected: ${client.id}`);
@@ -67,6 +69,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     client.join(`room_${room.id}`)
     this.logger.log(`Client ${client.id} joined room ${room.id}`);
-
   }
 }
