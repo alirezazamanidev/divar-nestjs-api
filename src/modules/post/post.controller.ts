@@ -9,7 +9,7 @@ import {
   Query,
   Logger,
 } from '@nestjs/common';
-import { PostService } from './post.service';
+import PostService from './post.service';
 import { CreatePostDto } from './dtos/post.dto';
 import { Auth } from '../auth/decorators';
 import { ApiConsumes, ApiOperation, ApiQuery } from '@nestjs/swagger';

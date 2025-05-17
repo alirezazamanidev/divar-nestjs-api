@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PostService } from '../post.service';
+import PostService from '../post.service';
 import { mock, MockProxy, mockReset } from 'jest-mock-extended';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { PostEntity } from '../entities/post.entity';

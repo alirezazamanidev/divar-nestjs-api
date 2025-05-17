@@ -39,7 +39,7 @@ import {
   paginationSolver,
 } from 'src/common/utils/pagination.utils';
 @Injectable({ scope: Scope.REQUEST })
-export class PostService {
+export default class PostService {
   constructor(
 
     @Inject(REQUEST) private readonly request: Request,
