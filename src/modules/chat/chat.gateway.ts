@@ -30,17 +30,12 @@ import { TokenService } from '../auth/token.service';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
-
   private readonly logger:Logger=new Logger(ChatGateway.name);
 
+  
   constructor(
-    private readonly chatService: ChatService,
-    private readonly messageService: MessageService,
-    private readonly jwtService: JwtService,
-  ) {
-  
-  }
-  
+    private readonly chatService:ChatService
+  ){}
   async handleConnection(client: Socket) {
     // const payload = this.validateTokenFromCookies(client);
     
@@ -54,58 +49,58 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`❌ Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('joinRoom')
-  async onJoinRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() dto: JoinRoomDto,
-  ) {
-    const room = await this.chatService.findOneById(dto.roomId);
-    const recentMessages=await this.messageService.recentMessages(room.id);
-    client.join(`room_${room.id}`);
-    this.server.to(`room_${room.id}`).emit('messages',recentMessages);
-    this.logger.log(`Client ${client.id} joined room ${room.id}`);
-  }
+  // @SubscribeMessage('joinRoom')
+  // async onJoinRoom(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() dto: JoinRoomDto,
+  // ) {
+  //   const room = await this.chatService.findOneById(dto.roomId);
+  //   const recentMessages=await this.messageService.recentMessages(room.id);
+  //   client.join(`room_${room.id}`);
+  //   this.server.to(`room_${room.id}`).emit('messages',recentMessages);
+  //   this.logger.log(`Client ${client.id} joined room ${room.id}`);
+  // }
 
-  @SubscribeMessage('send.message')
-  async onSendMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() dto: SendMessageDto,
-  ) {
-    const { userId } = client.data.user;
-    let chatId = dto.roomId ?? null;
+  // @SubscribeMessage('send.message')
+  // async onSendMessage(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() dto: SendMessageDto,
+  // ) {
+  //   const { userId } = client.data.user;
+  //   let chatId = dto.roomId ?? null;
 
-    if (!chatId && dto.postId) {
-      const room = await this.chatService.createRoom(userId, dto.postId);
-      chatId = room.id;
-      // join to room
-      client.join(`room_${chatId}`);
-    }
-    const message = await this.messageService.create(
-      dto.text,
-      chatId!,
-      client.data.user.userId,
-    );
+  //   if (!chatId && dto.postId) {
+  //     const room = await this.chatService.createRoom(userId, dto.postId);
+  //     chatId = room.id;
+  //     // join to room
+  //     client.join(`room_${chatId}`);
+  //   }
+  //   const message = await this.messageService.create(
+  //     dto.text,
+  //     chatId!,
+  //     client.data.user.userId,
+  //   );
 
-    this.server.to(`room_${chatId}`).emit('newMessage', message);
-  }
+  //   this.server.to(`room_${chatId}`).emit('newMessage', message);
+  // }
 
 
 
-  validateTokenFromCookies(client: Socket) {
-    const rawCookie = client.handshake.headers.cookie;
-    if (!rawCookie) throw new UnauthorizedException(AuthMessages.LoginAgain);
-    const cookies = parse(rawCookie);
-    const token = cookies[CookieNameEnum.Access_token];
-    if (!token) throw new UnauthorizedException(AuthMessages.LoginAgain);
+  // validateTokenFromCookies(client: Socket) {
+  //   const rawCookie = client.handshake.headers.cookie;
+  //   if (!rawCookie) throw new UnauthorizedException(AuthMessages.LoginAgain);
+  //   const cookies = parse(rawCookie);
+  //   const token = cookies[CookieNameEnum.Access_token];
+  //   if (!token) throw new UnauthorizedException(AuthMessages.LoginAgain);
 
-    try {
+  //   try {
 
-      return this.jwtService.verify(token);
-    } catch (error) {
-      client.disconnect();
-      console.log(error);
+  //     return this.jwtService.verify(token);
+  //   } catch (error) {
+  //     client.disconnect();
+  //     console.log(error);
       
-      // throw new UnauthorizedException(AuthMessages.LoginAgain);
-    }
-  }
+  //     // throw new UnauthorizedException(AuthMessages.LoginAgain);
+  //   }
+  // }
 }

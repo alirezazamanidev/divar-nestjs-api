@@ -11,10 +11,9 @@ import { MessageService } from './services/message.service';
   imports: [
 
     TypeOrmModule.forFeature([MessageEntity, ChatRoomEntity]),
-    PostModule,
   
   ],
-  providers: [ ChatService,MessageService,ChatGateway],
+  providers: [ ChatGateway,ChatService,MessageService],
   // controllers:[ChatController]
 })
 export class ChatModule {}

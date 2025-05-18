@@ -20,62 +20,62 @@ export class ChatService {
     private readonly postService: PostService,
   ) {}
 
-  async findOneById(id: string) {
-    const cacheKey = `chatRoom:${id}`;
-    const cachedRoom = await this.cacheManager.get<ChatRoomEntity>(cacheKey);
-    if (cachedRoom) return cachedRoom;
+  // async findOneById(id: string) {
+  //   const cacheKey = `chatRoom:${id}`;
+  //   const cachedRoom = await this.cacheManager.get<ChatRoomEntity>(cacheKey);
+  //   if (cachedRoom) return cachedRoom;
 
-    const room = await this.roomRepository.findOne({ where: { id } });
-    if (!room) throw new NotFoundException('چت یافت نشد!');
-    await this.cacheManager.set(cacheKey, room, 3600); // 1 hours
+  //   const room = await this.roomRepository.findOne({ where: { id } });
+  //   if (!room) throw new NotFoundException('چت یافت نشد!');
+  //   await this.cacheManager.set(cacheKey, room, 3600); // 1 hours
 
-    return room;
-  }
-  async checkExist(
-    userId: string,
-    postId: string,
-  ): Promise<ChatRoomEntity | null> {
-    return  this.roomRepository.findOne({
-      where: [
-        { postId, buyerId: userId },
-        { postId, sellerId: userId },
-      ],
-      select: ['id'],
-    });
-  }
+  //   return room;
+  // }
+  // async checkExist(
+  //   userId: string,
+  //   postId: string,
+  // ): Promise<ChatRoomEntity | null> {
+  //   return  this.roomRepository.findOne({
+  //     where: [
+  //       { postId, buyerId: userId },
+  //       { postId, sellerId: userId },
+  //     ],
+  //     select: ['id'],
+  //   });
+  // }
 
-  async findAllForUser(userId: string) {
-    const key = `user-rooms:${userId}`;
-    const roomsCache = await this.cacheManager.get<ChatRoomEntity>(key);
-    if (roomsCache) return roomsCache;
-    const rooms = await this.roomRepository.find({
-      where: [{ buyerId: userId }, { sellerId: userId }],
-      relations: ['post'],
-      select: {
-        post: {
-          id: true,
-          title: true,
-          slug: true,
-          mediaFiles: true,
-        },
-      },
-      order: { created_at: 'DESC' },
-    });
-    if (rooms.length > 0) {
-      await this.cacheManager.set(key, rooms, 3600); // 1 hours
-    }
-    return rooms;
-  }
-  async createRoom(userId: string, postId: string) {
-    const post = await this.postService.findOneById(postId);
-    if (!post.allowChatMessages)
-      throw new ForbiddenException('اجازه ارسال پیام ندارید!');
-    let room = this.roomRepository.create({
-      postId,
-      sellerId: post.userId,
-      buyerId: userId,
-    });
-    room = await this.roomRepository.save(room);
-    return room;
-  }
+  // async findAllForUser(userId: string) {
+  //   const key = `user-rooms:${userId}`;
+  //   const roomsCache = await this.cacheManager.get<ChatRoomEntity>(key);
+  //   if (roomsCache) return roomsCache;
+  //   const rooms = await this.roomRepository.find({
+  //     where: [{ buyerId: userId }, { sellerId: userId }],
+  //     relations: ['post'],
+  //     select: {
+  //       post: {
+  //         id: true,
+  //         title: true,
+  //         slug: true,
+  //         mediaFiles: true,
+  //       },
+  //     },
+  //     order: { created_at: 'DESC' },
+  //   });
+  //   if (rooms.length > 0) {
+  //     await this.cacheManager.set(key, rooms, 3600); // 1 hours
+  //   }
+  //   return rooms;
+  // }
+  // async createRoom(userId: string, postId: string) {
+  //   const post = await this.postService.findOneById(postId);
+  //   if (!post.allowChatMessages)
+  //     throw new ForbiddenException('اجازه ارسال پیام ندارید!');
+  //   let room = this.roomRepository.create({
+  //     postId,
+  //     sellerId: post.userId,
+  //     buyerId: userId,
+  //   });
+  //   room = await this.roomRepository.save(room);
+  //   return room;
+  // }
 }
