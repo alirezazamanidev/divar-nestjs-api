@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -23,7 +24,8 @@ export class ChatRoomEntity extends BaseEntity {
   sellerId: string;
   @OneToMany(() => MessageEntity, (msg) => msg.room)
   messages: MessageEntity[];
-  @OneToOne(() => MessageEntity, { onDelete: 'CASCADE' })
+  @OneToOne(() => MessageEntity, { onDelete: 'CASCADE',nullable:true })
+  @JoinColumn({ name: 'lastMessageId' })
   lastMessage: MessageEntity;
   @ManyToOne(() => PostEntity)
   post: PostEntity;

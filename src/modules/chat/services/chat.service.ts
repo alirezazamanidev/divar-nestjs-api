@@ -47,12 +47,15 @@ export class ChatService {
   }
 
   async findAllForUser(userId: string) {
-    const key = `user-rooms:${userId}`;
+    const key = `rooms:user:${userId}`;
     const roomsCache = await this.cacheManager.get<ChatRoomEntity>(key);
     if (roomsCache) return roomsCache;
     const rooms = await this.roomRepository.find({
       where: [{ buyerId: userId }, { sellerId: userId }],
-      relations: ['post'],
+      relations:{
+        lastMessage:true,
+        post:true,
+      },
       select: {
         post: {
           id: true,

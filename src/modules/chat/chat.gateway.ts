@@ -45,7 +45,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`✅ Client connected: ${client.id}`);
     // get all chats
     const rooms = await this.chatService.findAllForUser(payload.userId);
-    // client.emit('get-chats', rooms);
+    client.emit('get-chats', rooms);
   }
   handleDisconnect(client: Socket) {
     this.logger.log(`❌ Client disconnected: ${client.id}`);
