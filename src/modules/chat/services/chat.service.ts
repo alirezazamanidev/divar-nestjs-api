@@ -19,7 +19,8 @@ export class ChatService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @InjectRepository(ChatRoomEntity)
     private readonly roomRepository: Repository<ChatRoomEntity>,
-    @InjectRepository(PostEntity) private readonly postRepository:Repository<PostEntity>
+    @InjectRepository(PostEntity)
+    private readonly postRepository: Repository<PostEntity>,
   ) {}
 
   async findOneById(id: string) {
@@ -37,13 +38,15 @@ export class ChatService {
     userId: string,
     postId: string,
   ): Promise<ChatRoomEntity | null> {
-    return  this.roomRepository.findOne({
+    const room = await this.roomRepository.findOne({
       where: [
         { postId, buyerId: userId },
         { postId, sellerId: userId },
       ],
       select: ['id'],
     });
+
+    return room;
   }
 
   async findAllForUser(userId: string) {
@@ -52,9 +55,9 @@ export class ChatService {
     if (roomsCache) return roomsCache;
     const rooms = await this.roomRepository.find({
       where: [{ buyerId: userId }, { sellerId: userId }],
-      relations:{
-        lastMessage:true,
-        post:true,
+      relations: {
+        lastMessage: true,
+        post: true,
       },
       select: {
         post: {
@@ -72,8 +75,11 @@ export class ChatService {
     return rooms;
   }
   async createRoom(userId: string, postId: string) {
-    const post = await this.postRepository.findOne({where:{id:postId},select:['userId','allowChatMessages']});
-    if(!post) throw new NotFoundException(NotFoundMessages.Post);
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      select: ['userId', 'allowChatMessages'],
+    });
+    if (!post) throw new NotFoundException(NotFoundMessages.Post);
     if (!post.allowChatMessages)
       throw new ForbiddenException('اجازه ارسال پیام ندارید!');
     let room = this.roomRepository.create({
@@ -82,6 +88,28 @@ export class ChatService {
       buyerId: userId,
     });
     room = await this.roomRepository.save(room);
-    return room;
+ 
+   
+    return room
+  }
+  async findOneChat(id:string){
+    return  this.roomRepository.findOneOrFail({
+      where: { id },
+      relations: { post: true, lastMessage: true },
+      select:{
+        post:{
+          id: true,
+          title: true,
+          slug: true,
+          mediaFiles: true,
+        },
+        lastMessage:{
+          id:true,
+          text:true,
+          seen:true,
+          sentAt:true
+        }
+      }
+    });
   }
 }

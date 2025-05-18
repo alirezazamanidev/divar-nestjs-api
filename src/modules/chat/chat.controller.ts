@@ -11,6 +11,8 @@ export class ChatController{
 
     @Get('/check-exist/:postId')
     checkExist(@Param('postId') postId:string,@Req() req:Request){
+        console.log(postId);
+        
         return this.chatService.checkExist(req.user.id,postId)
 
     }

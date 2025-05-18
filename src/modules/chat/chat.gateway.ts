@@ -43,6 +43,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
     client.data.user = payload;
     this.logger.log(`✅ Client connected: ${client.id}`);
+    client.join(`user_${payload.userId}`)
+
     // get all chats
     const rooms = await this.chatService.findAllForUser(payload.userId);
     client.emit('get-chats', rooms);
@@ -80,25 +82,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { userId } = client.data.user;
     let chatId = dto.roomId ?? null;
-
+    let isNewRoom = false;
+    
     if (!chatId && dto.postId) {
       const room = await this.chatService.createRoom(userId, dto.postId);
       chatId = room.id;
+      isNewRoom = true;
       // join to room
       client.join(`room_${chatId}`);
     }
+
     const message = await this.messageService.create(
       dto.text,
       chatId!,
       client.data.user.userId,
     );
 
+    // Update last message and emit to all users in the chat
+    const updatedChat = await this.chatService.findOneChat(chatId!);
     this.server.to(`room_${chatId}`).emit('newMessage', message);
+    this.server.to(`user_${userId}`).emit('update-chat', updatedChat);
+    this.server.to(`user_${updatedChat.sellerId}`).emit('update-chat', updatedChat);
 
-    return chatId
+    if (isNewRoom) {
+      this.server.to(`user_${userId}`).emit('add-chat', updatedChat);
+      this.server.to(`user_${updatedChat.sellerId}`).emit('add-chat', updatedChat);
+    }
+
+    return chatId;
   }
 
-
+  @SubscribeMessage('typing')
+  onTyping(
+    @ConnectedSocket() client:Socket,
+    @MessageBody() dto:{roomId:string}
+  ){
+    // this.server.to(`room_${dto.roomId}`).
+    client.broadcast.to(`room_${dto.roomId}`).emit(`isTyping`,{
+      userId:client.data.user.userId
+    })
+  }
 
   validateTokenFromCookies(client: Socket) {
     const rawCookie = client.handshake.headers.cookie;
