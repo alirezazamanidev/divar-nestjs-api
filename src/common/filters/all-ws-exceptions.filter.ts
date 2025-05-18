@@ -1,29 +1,35 @@
-
 import {
-    ArgumentsHost,
-    Catch,
-    ExceptionFilter,
-    Logger,
-  } from '@nestjs/common';
-  import { Socket } from 'socket.io';
-  
-  @Catch()
-  export class WsAllExceptionsFilter implements ExceptionFilter {
-    private readonly logger = new Logger(WsAllExceptionsFilter.name);
-  
-    catch(exception: any, host: ArgumentsHost) {
-      const client: Socket = host.switchToWs().getClient<Socket>();
-      const context = host.switchToWs();
-  
-      // لاگ کردن خطا
-      this.logger.error('Unhandled WebSocket exception', exception.stack || exception);
-  
-      // ارسال پیام خطای استاندارد به کلاینت
-      client.emit('error', {
-        status: 'error',
-        message: exception?.message || 'Internal server error',
-        code: exception?.code || 'INTERNAL_ERROR',
-      });
-    }
+  ArgumentsHost,
+  Catch,
+  HttpException,
+  Logger,
+} from '@nestjs/common';
+import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
+
+@Catch()
+export class WsAllExceptionsFilter extends BaseWsExceptionFilter {
+  private readonly logger = new Logger(WsAllExceptionsFilter.name);
+
+  catch(exception: unknown, host: ArgumentsHost) {
+    const client: Socket = host.switchToWs().getClient<Socket>();
+    const error =
+      exception instanceof HttpException
+        ? exception
+        : new WsException('Internal server error');
+
+    const status =
+      exception instanceof HttpException ? exception.getStatus() : 500;
+    const message =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : 'Internal server error';
+
+    this.logger.error(`WebSocket Error: ${JSON.stringify(message)}`);
+
+    client.emit('error', {
+      status,
+      message,
+    });
   }
-  
+}

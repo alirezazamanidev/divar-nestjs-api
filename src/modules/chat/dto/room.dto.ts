@@ -5,3 +5,10 @@ export class JoinRoomDto {
     @IsUUID()
     roomId:string
 }
+
+
+export class CheckExistRoomDto {
+    @IsNotEmpty()
+    @IsUUID()
+    postId:string
+}

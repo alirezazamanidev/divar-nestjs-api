@@ -14,11 +14,12 @@ import { WsAllExceptionsFilter } from 'src/common/filters/all-ws-exceptions.filt
 import { parse } from 'cookie';
 import { AuthMessages, CookieNameEnum } from 'src/common/enums';
 import { JwtService } from '@nestjs/jwt';
-import { JoinRoomDto } from './dto/room.dto';
+import { CheckExistRoomDto, JoinRoomDto } from './dto/room.dto';
 import { SendMessageDto } from './dto/message.dto';
 import { MessageService } from './services/message.service';
+import { TokenService } from '../auth/token.service';
 
-@UseFilters(new WsAllExceptionsFilter())
+// @UseFilters(new WsAllExceptionsFilter())
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
@@ -27,42 +28,27 @@ import { MessageService } from './services/message.service';
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(
-    private readonly chatService: ChatService,
-    private readonly messageService: MessageService,
-    private jwtService: JwtService,
-  ) {}
   @WebSocketServer()
   server: Server;
 
-  private readonly logger = new Logger(ChatGateway.name);
+  private readonly logger:Logger=new Logger(ChatGateway.name);
 
-  validateTokenFromCookies(client: Socket) {
-    const rawCookie = client.handshake.headers.cookie;
-    if (!rawCookie) throw new UnauthorizedException(AuthMessages.LoginAgain);
-    const cookies = parse(rawCookie);
-    const token = cookies[CookieNameEnum.Access_token];
-    if (!token) throw new UnauthorizedException(AuthMessages.LoginAgain);
-    try {
-      return this.jwtService.verify(token, {
-        secret: process.env.ACCESS_TOKEN_SECRET_KEY,
-      });
-    } catch (error) {
-      client.disconnect();
-      throw new UnauthorizedException(AuthMessages.LoginAgain);
-    }
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
+    private readonly jwtService: JwtService,
+  ) {
+  
   }
-  afterInit() {
-    this.logger.log('🔌 WebSocket Chat Gateway Initialized');
-  }
-
+  
   async handleConnection(client: Socket) {
-    const payload = this.validateTokenFromCookies(client);
-    client.data.user = payload;
+    // const payload = this.validateTokenFromCookies(client);
+    
+    // client.data.user = payload;
     this.logger.log(`✅ Client connected: ${client.id}`);
     // get all chats
-    const rooms = await this.chatService.findAllForUser(payload.userId);
-    client.emit('get-chats', rooms);
+    // const rooms = await this.chatService.findAllForUser(payload.userId);
+    // client.emit('get-chats', rooms);
   }
   handleDisconnect(client: Socket) {
     this.logger.log(`❌ Client disconnected: ${client.id}`);
@@ -79,6 +65,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(`room_${room.id}`).emit('messages',recentMessages);
     this.logger.log(`Client ${client.id} joined room ${room.id}`);
   }
+
   @SubscribeMessage('send.message')
   async onSendMessage(
     @ConnectedSocket() client: Socket,
@@ -100,5 +87,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     this.server.to(`room_${chatId}`).emit('newMessage', message);
+  }
+
+
+
+  validateTokenFromCookies(client: Socket) {
+    const rawCookie = client.handshake.headers.cookie;
+    if (!rawCookie) throw new UnauthorizedException(AuthMessages.LoginAgain);
+    const cookies = parse(rawCookie);
+    const token = cookies[CookieNameEnum.Access_token];
+    if (!token) throw new UnauthorizedException(AuthMessages.LoginAgain);
+
+    try {
+
+      return this.jwtService.verify(token);
+    } catch (error) {
+      client.disconnect();
+      console.log(error);
+      
+      // throw new UnauthorizedException(AuthMessages.LoginAgain);
+    }
   }
 }

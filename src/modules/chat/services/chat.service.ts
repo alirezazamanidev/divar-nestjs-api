@@ -31,6 +31,18 @@ export class ChatService {
 
     return room;
   }
+  async checkExist(
+    userId: string,
+    postId: string,
+  ): Promise<ChatRoomEntity | null> {
+    return  this.roomRepository.findOne({
+      where: [
+        { postId, buyerId: userId },
+        { postId, sellerId: userId },
+      ],
+      select: ['id'],
+    });
+  }
 
   async findAllForUser(userId: string) {
     const key = `user-rooms:${userId}`;

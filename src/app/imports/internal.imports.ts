@@ -37,5 +37,5 @@ export const appInternalImports = [
       module: CategoryModule,
     },
   ]),
-  // ExceptionModule
+  ExceptionModule
 ];

@@ -9,7 +9,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 export class MessageService {
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-
     @InjectRepository(MessageEntity)
     private readonly messageRepository: Repository<MessageEntity>,
   ) {}
