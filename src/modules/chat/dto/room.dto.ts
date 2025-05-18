@@ -6,6 +6,12 @@ export class JoinRoomDto {
     roomId:string
 }
 
+export class leaveRoomDto {
+    @IsNotEmpty()
+    @IsUUID()
+    roomId:string
+}
+
 
 export class CheckExistRoomDto {
     @IsNotEmpty()
