@@ -30,20 +30,19 @@ import { TokenService } from '../auth/token.service';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
-  private readonly logger:Logger=new Logger(ChatGateway.name);
+  private readonly logger: Logger = new Logger(ChatGateway.name);
 
-  
   constructor(
-    private readonly chatService:ChatService,
-    private readonly messageService:MessageService,
-    private readonly jwtService:JwtService
-  ){}
+    private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
+    private readonly jwtService: JwtService,
+  ) {}
   async handleConnection(client: Socket) {
     const payload = this.validateTokenFromCookies(client);
-    
+
     client.data.user = payload;
     this.logger.log(`✅ Client connected: ${client.id}`);
-    client.join(`user_${payload.userId}`)
+    client.join(`user_${payload.userId}`);
 
     // get all chats
     const rooms = await this.chatService.findAllForUser(payload.userId);
@@ -59,22 +58,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() dto: JoinRoomDto,
   ) {
     const room = await this.chatService.findOneById(dto.roomId);
-    await this.messageService.markMessageAsSeen(room.id,client.data.user.userId)
-    const recentMessages=await this.messageService.recentMessages(room.id);
+    await this.messageService.markMessageAsSeen(
+      room.id,
+      client.data.user.userId,
+    );
+    const recentMessages = await this.messageService.recentMessages(room.id);
     client.join(`room_${room.id}`);
-    this.server.to(`room_${room.id}`).emit('messages',recentMessages);
+    this.server.to(`room_${room.id}`).emit('messages', recentMessages);
+    this.server.to(`room_${room.id}`).emit('getChatInfo', room?.post);
     this.logger.log(`Client ${client.id} joined room ${room.id}`);
   }
+  // @SubscribeMessage('getChatInfo')
+  // async getChatInfo(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() dto: {postId:string},
+  // ){
+  //   const post=await this.chatService.
+  // }
   @SubscribeMessage('leaveRoom')
   onLeaveRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: leaveRoomDto,
-  ){
-
+  ) {
     client.leave(`room_${dto.roomId}`);
 
     this.logger.log(`🚪 Client ${client.id} has left room ${dto.roomId} !`);
-    
   }
   @SubscribeMessage('send.message')
   async onSendMessage(
@@ -84,7 +92,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { userId } = client.data.user;
     let chatId = dto.roomId ?? null;
     let isNewRoom = false;
-    let seen=false
+    let seen = false;
     if (!chatId && dto.postId) {
       const room = await this.chatService.createRoom(userId, dto.postId);
       chatId = room.id;
@@ -93,19 +101,30 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.join(`room_${chatId}`);
     }
 
+    const joinSockets = await this.server.in(`room_${chatId}`).fetchSockets();
     const message = await this.messageService.create(
       dto.text,
       chatId!,
       client.data.user.userId,
     );
-
+    const reciversocket = joinSockets.find((s) => s.data.user.userId != userId);
+    if (reciversocket) seen = true;
     // Update last message and emit to all users in the chat
-    this.server.to(`room_${chatId}`).emit('newMessage', message);
-    
+    this.server.to(`room_${chatId}`).emit('newMessage', { ...message, seen });
+
     if (isNewRoom) {
       const updatedChat = await this.chatService.findOneChat(chatId!);
       this.server.to(`user_${userId}`).emit('add-chat', updatedChat);
-      this.server.to(`user_${updatedChat.sellerId}`).emit('add-chat', updatedChat);
+      this.server
+        .to(`user_${updatedChat.sellerId}`)
+        .emit('add-chat', updatedChat);
+    } else {
+      this.server.to(`user_${userId}`).emit('update-lastmessage', { ...message, seen });
+      if (reciversocket) {
+        this.server
+          .to(`user_${reciversocket.data.user.userId}`)
+          .emit('update-lastmessage', { ...message, seen });
+      }
     }
 
     return chatId;
@@ -113,13 +132,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('typing')
   onTyping(
-    @ConnectedSocket() client:Socket,
-    @MessageBody() dto:{roomId:string}
-  ){
-   
-    client.broadcast.to(`room_${dto.roomId}`).emit(`isTyping`,{
-      userId:client.data.user.userId
-    })
+    @ConnectedSocket() client: Socket,
+    @MessageBody() dto: { roomId: string },
+  ) {
+    client.broadcast.to(`room_${dto.roomId}`).emit(`isTyping`, {
+      userId: client.data.user.userId,
+    });
   }
 
   validateTokenFromCookies(client: Socket) {
@@ -130,12 +148,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!token) throw new UnauthorizedException(AuthMessages.LoginAgain);
 
     try {
-
-      return this.jwtService.verify(token,{secret:process.env.ACCESS_TOKEN_SECRET_KEY});
+      return this.jwtService.verify(token, {
+        secret: process.env.ACCESS_TOKEN_SECRET_KEY,
+      });
     } catch (error) {
       client.disconnect();
       console.log(error);
-      
+
       throw new UnauthorizedException(AuthMessages.LoginAgain);
     }
   }
