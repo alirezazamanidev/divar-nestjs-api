@@ -59,6 +59,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() dto: JoinRoomDto,
   ) {
     const room = await this.chatService.findOneById(dto.roomId);
+    await this.messageService.markMessageAsSeen(room.id,client.data.user.userId)
     const recentMessages=await this.messageService.recentMessages(room.id);
     client.join(`room_${room.id}`);
     this.server.to(`room_${room.id}`).emit('messages',recentMessages);
@@ -83,7 +84,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { userId } = client.data.user;
     let chatId = dto.roomId ?? null;
     let isNewRoom = false;
-    
+    let seen=false
     if (!chatId && dto.postId) {
       const room = await this.chatService.createRoom(userId, dto.postId);
       chatId = room.id;
@@ -99,12 +100,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     // Update last message and emit to all users in the chat
-    const updatedChat = await this.chatService.findOneChat(chatId!);
     this.server.to(`room_${chatId}`).emit('newMessage', message);
-    this.server.to(`user_${userId}`).emit('update-chat', updatedChat);
-    this.server.to(`user_${updatedChat.sellerId}`).emit('update-chat', updatedChat);
-
+    
     if (isNewRoom) {
+      const updatedChat = await this.chatService.findOneChat(chatId!);
       this.server.to(`user_${userId}`).emit('add-chat', updatedChat);
       this.server.to(`user_${updatedChat.sellerId}`).emit('add-chat', updatedChat);
     }
@@ -117,7 +116,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client:Socket,
     @MessageBody() dto:{roomId:string}
   ){
-    // this.server.to(`room_${dto.roomId}`).
+   
     client.broadcast.to(`room_${dto.roomId}`).emit(`isTyping`,{
       userId:client.data.user.userId
     })

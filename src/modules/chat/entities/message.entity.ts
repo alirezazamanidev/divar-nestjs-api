@@ -15,7 +15,13 @@ export class MessageEntity extends BaseEntity {
     text:string
     @Column({default:false})
     seen:boolean
-    @CreateDateColumn()
+    @CreateDateColumn({
+        type: "timestamp",
+        transformer: {
+          from: (value: Date) => value,
+          to: () => new Date().toUTCString(),
+        },
+      })
     sentAt:Date
     // reletions
     @ManyToOne(()=>UserEntity,{onDelete:'CASCADE'})
